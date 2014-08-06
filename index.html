@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>NimbusBase Founder</title>
+	<link href="dist/css/default.css" rel="stylesheet" />
+	<script src="dist/main.js"></script>
+	<script src="app/app.js"></script>
+</head>
+<body>
+	<div id="app-loading">
+		<div id="login_buttons">
+			<img id="logo_loading" src="assets/img/foundry_logo.gif" style="padding: 5px; height: 60px;"/>
+
+			<p class="simple_spinner">
+				<span class="spinner_div" style="display: inline-block"></span><span class="s_text">Logging In</span>
+			</p>
+			<a class="btn outline" id="google_login"><i style="color: #3498db;margin-right: 5px;" class="icon-google-plus"></i> Log in with Google Drive</a>
+		</div>
+	</div>
+	<!-- /.navbar -->
+	
+	<ul class="menu" ng-cloak>
+		<li class="brand">
+			<img id="logo" src="assets/img/foundry_logo.gif" />
+			<a id="user" data-toggle="dropdown"> 
+				<img id="user_pic" src="photo.jpg" />
+				<i class="icon-angle-down" style="font-size: 15px;"></i> 
+			</a>
+			<ul class="dropdown-menu" style="width: 186px; margin-left: 20px; top: 45px; background-color: #fff;">
+				<li>
+					<div class="identity_div">
+						<img id="user_pic_large" src="photo.jpg" style="height: 50px;"/>
+						<p>
+							<strong>{{ _current_global_user.name }}</strong>
+							<br />
+							{{_current_global_user.email}}
+							<br />
+							<a class="btn blue_login logout_btn" ng-click=""> Log Out </a>
+						</p>
+					</div>
+				</li>
+			</ul>
+		</li>
+		<!--  -->
+		<li ng-hide="_plugin.hide_plugin" ng-repeat="_plugin in _plugins | orderBy:'order':false" ng-class="{active:'#'+_active_app_path==_plugin.anchor}">
+			<a href="{{_plugin.anchor}}"><span><i class="{{_plugin.icon}}" ></i>{{_plugin.title}}</span></a>
+		</li>
+
+		<li>
+			<a href="" class="logout_btn" style="position: fixed; bottom: 0px;"> <span style="background-color: #343434; border-top: 2px solid #484848; font-size: 1.2em;"><i class="icon-signout" ></i>Logout</span> </a>
+		</li>
+	</ul>
+	<div class="page-wrap">
+		<ng-view ng-cloak></ng-view>
+	</div>
+</body>
+</html>

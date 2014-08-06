@@ -1,0 +1,27 @@
+{
+    "name": "Forum",
+    "version": "0.3.3",
+    "private": true,
+    "engines": {
+        "node": ">=0.10.* <0.11.4"
+    },
+    "engineStrict": true,
+    "dependencies": {
+        "grunt" : "*",
+        "grunt-contrib-concat"  : "*",
+        "grunt-contrib-uglify" : "*",
+        "grunt-contrib-nodeunit" : "*",
+        "grunt-contrib-jshint" : "*",
+        "grunt-contrib-watch" : "*",
+        "grunt-contrib-cssmin" : "*"
+    },
+    "devDependencies": {
+        "grunt" : "*",
+        "grunt-contrib-concat"  : "*",
+        "grunt-contrib-uglify" : "*",
+        "grunt-contrib-nodeunit" : "*",
+        "grunt-contrib-jshint" : "*",
+        "grunt-contrib-watch" : "*",
+        "grunt-contrib-cssmin" : "*"
+    }
+}
