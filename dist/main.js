@@ -37183,36 +37183,6 @@ angular.module("ui.bootstrap",["ui.bootstrap.tpls","ui.bootstrap.alert","ui.boot
             foundry._current_owner = user;
           }
         }
-        this.get_user_plan(function(plan) {
-          var expired, limit, msg, plan_type, status, type;
-          console.log('plan : ', plan);
-          limit = [10, 25, 50];
-          plan_type = [0, 1, 2, 3];
-          type = 0;
-          expired = false;
-          status = 1;
-          if (plan) {
-            type = Number(plan.order.type);
-            expired = moment(plan.order.date).add('y', 1) < moment.valueOf();
-            status = plan.order.status;
-          }
-          if (foundry._current_user.id !== foundry._current_owner.id) {
-            return;
-          }
-          if (status === 0) {
-            msg = '<div style="padding:20px">Your subscription is canceled, Please repurchase it.</div>';
-            return self.alert_for_upgrade(msg);
-          } else if (expired) {
-            msg = '<div style="padding:20px">Your subscription is expired, Please update it.</div>';
-            return self.alert_for_upgrade(msg);
-          } else {
-            if (type === 3) {
-              return console.log('ultimate plan');
-            } else if (user_model.all().length > limit[type]) {
-              return self.alert_for_upgrade();
-            }
-          }
-        });
         return inject_controller();
       },
       check_users: function() {
