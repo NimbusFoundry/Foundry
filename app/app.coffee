@@ -7,7 +7,7 @@ foundry.angular.dependency = []
 
 define('config', ()->
 	config = {}
-	config.appName = 'Forum'
+	config.appName = 'Foundry'
 	config.plugins = 
 		user : 'core/plugins/user'
 		workspace : 'core/plugins/workspace'
@@ -23,7 +23,7 @@ Nimbus.Auth.setup
 		'key': '696230129324-k4g89ugcu02k5obu9hs1u5tp3e54n02u.apps.googleusercontent.com'
 		"scope": "openid https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/gmail.compose https://www.googleapis.com/auth/gmail.modify https://apps-apis.google.com/a/feeds/domain/"
 		# "app_name": "foundry"
-	"app_name": "forum"
+	"app_name": "Foundry"
 	'synchronous' : false
 
 # callback for loading
