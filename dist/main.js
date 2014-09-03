@@ -25965,6 +25965,9 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
         log("index", i);
         if (i.length > 0) {
           log("file there");
+          if (workspace==0) {
+            delete localStorage.last_opened_workspace;
+          };
           c_file = i[workspace];
           window.c_file = c_file;
           return gapi.drive.realtime.load(c_file.id, onFileLoaded, initializeModel, handleErrors);
