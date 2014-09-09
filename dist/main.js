@@ -26455,17 +26455,28 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
           return log("Update Complete ", file);
         };
       }
-      params = {
-        path: "/upload/drive/v2/files",
-        method: "POST",
-        params: {
-          uploadType: "multipart"
-        },
-        headers: {
-          "Content-Type": "multipart/mixed; boundary=\"" + boundary + "\""
-        },
-        body: multipartRequestBody
-      };
+      if (content) {
+        params = {
+          path: "/upload/drive/v2/files",
+          method: "POST",
+          params: {
+            uploadType: "multipart"
+          },
+          headers: {
+            "Content-Type": "multipart/mixed; boundary=\"" + boundary + "\""
+          },
+          body: multipartRequestBody
+        };
+      } else {
+        params = {
+          path: "/drive/v2/files",
+          method: "POST",
+          body: {
+            'title': title,
+            'mimeType': contentType
+          }
+        };
+      }
       return this.make_request(params, callback);
     },
     deleteFile: function(file_id, callback) {
