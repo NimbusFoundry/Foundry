@@ -26694,6 +26694,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
           p = {
             id: person.id,
             name: person.name,
+            email: person.emailAddress,
             role: person.role
           };
           if (person.photoLink != null) {
