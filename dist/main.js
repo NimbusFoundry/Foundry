@@ -25347,14 +25347,14 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
       return this.fetch(this.proxy(this.loadLocal));
     },
     async_doc_setup: function() {
-      if (!window._indexdb && Nimbus.Auth.app_name) {
+      if (Nimbus.Auth.app_name) {
         window._indexdb = new PouchDB(Nimbus.Auth.app_name);
         Nimbus.Storage = {};
         Nimbus.is_async_done = false;
         _indexdb.allDocs({
           include_docs: true
         }, function(err, response) {
-          var doc, one, rows, _i, _len;
+          var doc, model, one, rows, _i, _len;
           if (!err) {
             rows = response.rows;
             for (_i = 0, _len = rows.length; _i < _len; _i++) {
@@ -25365,6 +25365,11 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
                   Nimbus.Storage[doc['type']] = [];
                 }
                 Nimbus.Storage[doc['type']].push(JSON.parse(doc.data));
+              }
+            }
+            for (model in Nimbus.dictModel) {
+              if (model && Nimbus.Storage[model]) {
+                Nimbus.dictModel[model].refresh(Nimbus.Storage[model]);
               }
             }
             return Nimbus.is_async_done = true;
@@ -25436,7 +25441,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
       }
       self = this;
       db = window._indexdb;
-      name = self.type;
+      name = self.name;
       if (Nimbus.is_async_done) {
         if (Nimbus.Storage[name]) {
           self.refresh(Nimbus.Storage[name]);
@@ -26657,6 +26662,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
           log("Add Share user Complete ", person);
           p = {
             id: person.id,
+            email: person.emailAddress,
             name: person.name,
             role: person.role
           };
