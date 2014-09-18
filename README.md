@@ -18,17 +18,19 @@ Learn about the built-in plugins on NimbusFoundry.
 #### [Our SDK documentation](http://nimbusfoundry.com/classdoc.htm)
 All of our classes and methods documented.
 
-# Baseci Installation
+# Basic Installation
 
 #### Github clone
 
- You can directly clone this repository as a base project, then you can write your own code.
+You can directly clone this repository as a base project, then you can write your own code.
 
- ` git clone git://github.com/NimbusFoundry/Foundry `
+``` 
+git clone git://github.com/NimbusFoundry/Foundry 
+```
 
 #### Terminl
 
- Or you can use the command-lind tool *foundry-cli* to complete this.
+Or you can use the command-lind tool *foundry-cli* to complete this.
 
  ```
 sudo npm install -g foundry-cli
