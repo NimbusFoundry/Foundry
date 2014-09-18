@@ -24,9 +24,9 @@ All of our classes and methods documented.
 
  You can directly clone this repository as a base project, then you can write your own code.
 
- > git clone git://github.com/NimbusFoundry/Foundry
+ ` git clone git://github.com/NimbusFoundry/Foundry `
 
- #### Terminl
+#### Terminl
 
  Or you can use the command-lind tool *foundry-cli* to complete this.
 
