@@ -28,9 +28,9 @@ You can directly clone this repository as a base project, then you can write you
 git clone git://github.com/NimbusFoundry/Foundry 
 ```
 
-#### Terminl
+#### Terminal
 
-Or you can use the command-lind tool *foundry-cli* to complete this.
+Or you can use the command-line tool **foundry-cli** to complete this.
 
  ```
 sudo npm install -g foundry-cli
@@ -39,4 +39,4 @@ foundry-cli create Name
 
 # Support
 
-If you have any question about this framework, you can feel free to conatct us directly via release@nimbusbase.com
+If you have any question about this framework, you can feel free to conatct us directly via release#nimbusbase.com (replace the # with @)
