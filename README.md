@@ -1,4 +1,20 @@
-Foundery
+NimbusFoundery
 ========
 
-NimbusBase Foundery
+NimbusFoundry is a framework built on top of AngularJS that reduces the work to build an app by prebuilding components such as user login, data storage, and user management. You can build the custom parts of your app by putting them into Angular based plugins.
+
+#### [Getting started with NimbusFoundry](http://nimbusfoundry.com/tutorial.html)
+Learn how to get a NimbusFoundry project up and running from cloning our github respository.
+
+#### [NimbusFoundry plugins explained](http://nimbusfoundry.com/tutorial-plugin.html)
+Now that you got NimbusFoundry running. Let's learn about how plugins works and more complex features, and write your first plugin!
+
+#### [NimbusFoundry models explained](http://nimbusfoundry.com/modeldoc.html)
+Explain how to add/edit/delete/create model instances. Also go into how NimbusFoundry can create forms for model objects automatically.
+
+#### [NimbusFoundry built-in plugins](http://nimbusfoundry.com/plugins.html)
+Learn about the built-in plugins on NimbusFoundry.
+
+#### [Our SDK documentation](http://nimbusfoundry.com/classdoc.htm)
+All of our classes and methods documented.
+
