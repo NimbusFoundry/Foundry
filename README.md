@@ -1,4 +1,4 @@
-NimbusFoundery
+NimbusFoundry
 ========
 
 NimbusFoundry is a framework built on top of AngularJS that reduces the work to build an app by prebuilding components such as user login, data storage, and user management. You can build the custom parts of your app by putting them into Angular based plugins.
