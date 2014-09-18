@@ -18,3 +18,6 @@ Learn about the built-in plugins on NimbusFoundry.
 #### [Our SDK documentation](http://nimbusfoundry.com/classdoc.htm)
 All of our classes and methods documented.
 
+# Support
+
+If you have any question about this framework, you can feel free to conatct us directly via release@nimbusbase.com
