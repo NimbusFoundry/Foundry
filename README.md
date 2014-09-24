@@ -46,4 +46,4 @@ www.example.com
 
 # Support
 
-If you have any question about this framework, you can feel free to conatct us directly via release#nimbusbase.com (replace the # with @)
+If you have any question about this framework, you can feel free to conatct us directly via admin#nimbusfoundry.com (replace the # with @)
