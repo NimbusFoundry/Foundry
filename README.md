@@ -1,4 +1,4 @@
-NimbusFoundery
+NimbusFoundry
 ========
 
 NimbusFoundry is a framework built on top of AngularJS that reduces the work to build an app by prebuilding components such as user login, data storage, and user management. You can build the custom parts of your app by putting them into Angular based plugins.
@@ -22,7 +22,7 @@ All of our classes and methods documented.
 
 #### Github clone
 
-You can directly clone this repository as a base project, then you can write your own code.
+You can directly fork this repository as a base project, then you can write your own code.
 
 ``` 
 git clone git://github.com/NimbusFoundry/Foundry 
@@ -37,6 +37,13 @@ sudo npm install -g foundry-cli
 foundry-cli create Name
  ```
 
+#### Change Domain
+You can create a **CNAME** file at the root directory, and put your own domain in there like below, then you can access the app using that url.
+
+```
+www.example.com
+```
+
 # Support
 
-If you have any question about this framework, you can feel free to conatct us directly via release#nimbusbase.com (replace the # with @)
+If you have any question about this framework, you can feel free to conatct us directly via admin#nimbusfoundry.com (replace the # with @)

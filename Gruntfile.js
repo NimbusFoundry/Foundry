@@ -24,44 +24,12 @@ module.exports = function(grunt) {
         banner: '<%= banner %>',
         stripBanners: true
       },
-      core : {
-        src : [
-          'core/ga.js',
-          'core/core.js',
-          'core/plugins/document/*.js',
-          'core/plugins/user/*.js',
-          'core/plugins/workspace/*.js',
-          'core/analytic.js',
-          'core/directives/*.js',
-          'core/filters/*.js'
-        ],
-        dest : 'dist/core.js'
-      },
       dist: {
         src: [
-              'vendor/base64utils.js',
-              'vendor/jquery.min.js',
-              'vendor/underscore-min.js',
-              'vendor/moment.min.js',
-              'vendor/angular.min.js',
-              'vendor/angular-sanitize.min.js',
-              'vendor/angular-route.js',
-              'vendor/spinjs/spin.js',
-              'vendor/iosOverlay.min.js',
-              'vendor/nimbus.min.js',
-              'vendor/require.js',
-              'vendor/dialog.js',
-              'vendor/bootstrap.js',
-              'vendor/bootstrap-tab.js',
-              'vendor/bootbox.min.js',
-              'vendor/bootstrap-wysihtml5/js/wysihtml5-0.3.0.min.js',
-              'vendor/bootstrap-wysihtml5/js/bootstrap-wysihtml5.js',
-              'vendor/bootstrap-wysihtml5/js/custom_image_and_upload_wysihtml5.js',
-              'vendor/ngDialog/js/ngDialog.min.js',
-              'vendor/ui-bootstrap/*.js',
+              'vendor/all-vendor.js',
               'dist/mailComposer.min.js',
               // 'dist/app.js',
-              'dist/core.js'
+              'vendor/core.js'
               ],
         dest: 'dist/main.js'
       }
@@ -129,32 +97,7 @@ module.exports = function(grunt) {
         }
       }
     },
-    cssmin: {
-         options: {
-             keepSpecialComments: 0
-         },
-         compress: {
-             files: {
-                 'dist/css/default.css': [
-                    "assets/bootstrap/css/bootstrap.min.css",
-                    "assets/fontawesome/css/font-awesome.min.css",
-                    "assets/icheck/skins/square/square.css", 
-                    "assets/css/styles.css",
-                    "assets/jasny-bootstrap/css/jasny-bootstrap.min.css",
-                    "vendor/dialogs.css",
-                    "vendor/iosOverlay.css",
-                    "vendor/bootstrap-tagsinput/bootstrap-tagsinput.css",
-                    "vendor/ngDialog/css/ngDialog.css",
-                    "vendor/ngDialog/css/ngDialog-theme-default.css",
-                    "vendor/ng-tags-input/ng-tags-input.css",
-                    "vendor/bootstrap-wysihtml5/css/bootstrap-wysihtml5.css",
-                    "assets/calendar/zabuto_calendar.css",
-                    "vendor/fullcalendar/fullcalendar.css"
-                 ]
-             }
-         }
-     },
-     coffee: {
+    coffee: {
       jason: {
         files: coffeeForCompile
       }
@@ -173,6 +116,6 @@ module.exports = function(grunt) {
   // Default task.
   grunt.registerTask('default', ['jshint', 'nodeunit', 'concat', 'uglify']);
 
-  grunt.registerTask('build', ['concat', 'uglify','cssmin']);
+  grunt.registerTask('build', ['concat', 'uglify']);
 
 };
