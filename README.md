@@ -22,7 +22,7 @@ All of our classes and methods documented.
 
 #### Github clone
 
-You can directly clone this repository as a base project, then you can write your own code.
+You can directly fork this repository as a base project, then you can write your own code.
 
 ``` 
 git clone git://github.com/NimbusFoundry/Foundry 
@@ -36,6 +36,13 @@ Or you can use the command-line tool **foundry-cli** to complete this.
 sudo npm install -g foundry-cli
 foundry-cli create Name
  ```
+
+#### Change Domain
+You can create a **CNAME** file at the root directory, and put your own domain in there like below, then you can access the app using that url.
+
+```
+www.example.com
+```
 
 # Support
 
