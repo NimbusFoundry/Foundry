@@ -43,7 +43,7 @@
 			</ul>
 		</li>
 		<!--  -->
-		<li ng-hide="_plugin.hide_plugin" ng-repeat="_plugin in _plugins | orderBy:'order':false" ng-class="{active:'#'+_active_app_path==_plugin.anchor}">
+		<li ng-hide="_plugin.hide_plugin" ng-repeat="_plugin in _plugins | orderBy:'order':true" ng-class="{active:'#'+_active_app_path==_plugin.anchor}">
 			<a href="{{_plugin.anchor}}"><span><i class="{{_plugin.icon}}" ></i>{{_plugin.title}}</span></a>
 		</li>
 
