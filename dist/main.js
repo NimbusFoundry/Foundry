@@ -43385,16 +43385,9 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
             $('.create_button').removeClass('disabled');
             return $scope.creating_user = false;
           };
-          user_model.user_limit(function(reuslt) {
-            if (reuslt) {
-              $('.create_button').addClass('disabled');
-              return user_model.add_user($scope.user_data, function() {
-                return reset();
-              });
-            } else {
-              reset();
-              user_model.alert_for_upgrade();
-            }
+          $('.create_button').addClass('disabled');
+          user_model.add_user($scope.user_data, function() {
+            return reset();
           });
         };
         $scope.user_info = {};
@@ -43449,15 +43442,10 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
     }
     return angular.module(moduleName).controller('SupportController', [
       '$scope', '$foundry', function($scope, $foundry) {
-        var defaultEmail, ticketModel;
-        $scope.tickets = [];
+        var defaultEmail;
         $scope.newTicket = '';
         defaultEmail = 'admin@nimbusfoundry.com';
-        ticketModel = foundry._models['Ticket'];
-        $scope.load = function() {
-          return $scope.tickets = ticketModel.all();
-        };
-        $scope.createTicket = function() {
+        return $scope.createTicket = function() {
           var ccEmails, emails, msg, template;
           msg = $scope.newTicket;
           $scope.newTicket = '';
@@ -43485,23 +43473,6 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
           $foundry.gmail('Forum Support', emails[0], template, ccEmails);
           $('#notification').slideDown().delay(3000).slideUp();
         };
-        $scope.closeTicket = function(ticket) {
-          var allSolved;
-          ticket.solved = true;
-          ticket.save();
-          $scope.load();
-          allSolved = true;
-          for (ticket in $scope.tickets) {
-            if (!ticket.solved) {
-              allSolved = false;
-              break;
-            }
-          }
-          if (allSolved) {
-            Nimbus.Share.remove_share_user_real(defaultEmail);
-          }
-        };
-        return $scope.load();
       }
     ]);
   };
