@@ -20,13 +20,11 @@ All of our classes and methods documented.
 
 # Basic Installation
 
-#### Github clone
+#### Github fork
 
-You can directly fork this repository as a base project, then you can write your own code.
+You can directly fork this repository as a base project, then you can write your own code under app/
 
-``` 
-git clone git://github.com/NimbusFoundry/Foundry 
-```
+Change the google app id to host this on your own gh-page as a real working app
 
 #### Terminal
 
