@@ -441,8 +441,8 @@
       });
       ga('require', 'displayfeatures');
       ga('set', 'dimension1', foundry._current_user.email);
-      ga('set', 'dimension2', c_file.title);
-      ga('set', 'dimension3', c_file.owners[0].emailAddress + ':' + c_file.owners[0].displayName);
+      ga('set', 'dimension2', Nimbus.realtime.c_file.title);
+      ga('set', 'dimension3', Nimbus.realtime.c_file.owners[0].emailAddress + ':' + Nimbus.realtime.c_file.owners[0].displayName);
       count = foundry._models.User.all();
       ga('set', 'dimension4', count);
       return ga('send', 'pageview');
@@ -450,7 +450,7 @@
     get_owner_space_count = function() {
       var count, space, _i, _len, _ref;
       count = 0;
-      _ref = window.app_files;
+      _ref = Nimbus.realtime.app_files;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         space = _ref[_i];
         if (space.owners[0].permissionId === foundry._current_user.id) {
@@ -534,8 +534,8 @@
       all_file: function(callback) {
         var self;
         self = this;
-        if (folder) {
-          return Nimbus.Client.GDrive.getMetadataList("'" + folder.binary_files.id + "' in parents", function(data) {
+        if (Nimbus.realtime.folder) {
+          return Nimbus.Client.GDrive.getMetadataList("'" + Nimbus.realtime.folder.binary_files.id + "' in parents", function(data) {
             self._documents = window.create_object_dictionary(data.items);
             if (callback) {
               callback(data.items);
@@ -668,7 +668,7 @@
         _ref = foundry._user_list;
         for (id in _ref) {
           user = _ref[id];
-          if (user.id === c_file.owners[0].permissionId) {
+          if (user.id === Nimbus.realtime.c_file.owners[0].permissionId) {
             foundry._current_owner = user;
           }
         }
@@ -707,7 +707,7 @@
             if (user.email) {
               data.email = user.email;
             }
-            if (window.c_file.owners[0].permissionId === pid) {
+            if (Nimbus.realtime.c_file.owners[0].permissionId === pid) {
               data.role = 'Admin';
             } else {
               data.role = 'Viewer';
@@ -779,8 +779,8 @@
               return angular.element(document).scope().$apply();
             }
           });
-          if (folder && folder['binary_files']) {
-            return Nimbus.Share.add_share_user_real(user.email, null, folder['binary_files'].id);
+          if (Nimbus.realtime.folder && Nimbus.realtime.folder['binary_files']) {
+            return Nimbus.Share.add_share_user_real(user.email, null, Nimbus.realtime.folder['binary_files'].id);
           }
         }
       },
@@ -1025,7 +1025,8 @@
   var define_controller;
 
   define('workspace', ['require', 'core/analytic'], function(require, analytic) {
-    var doc_plugin;
+    var c_file, doc_plugin;
+    c_file = Nimbus.realtime.c_file;
     return doc_plugin = {
       type: 'plugin',
       title: 'Workspace',
@@ -1039,12 +1040,12 @@
       init: function() {
         var self;
         self = this;
-        if (localStorage['last_opened_workspace'] && (localStorage['last_opened_workspace'] !== c_file.id)) {
+        if (localStorage['last_opened_workspace'] && (localStorage['last_opened_workspace'] !== Nimbus.realtime.c_file.id)) {
           this.open({
             id: localStorage['last_opened_workspace']
           });
         } else {
-          localStorage['last_opened_workspace'] = c_file.id;
+          localStorage['last_opened_workspace'] = Nimbus.realtime.c_file.id;
           foundry.shared_users(function(users) {
             var _users;
             _users = users;
@@ -1075,11 +1076,12 @@
       },
       switch_callback: null,
       all_doc: function() {
-        var file, files, folders, _i, _len;
+        var file, files, folders, _i, _len, _ref;
         files = [];
         folders = [];
-        for (_i = 0, _len = app_files.length; _i < _len; _i++) {
-          file = app_files[_i];
+        _ref = Nimbus.realtime.app_files;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          file = _ref[_i];
           if (file.mimeType && file.mimeType === 'application/vnd.google-apps.drive-sdk.' + Nimbus.Auth.app_id) {
             files.push(file);
           } else {
@@ -1097,8 +1099,8 @@
             callback();
           }
           angular.element(document).scope().$apply();
-          ga('set', 'dimension2', c_file.title);
-          ga('set', 'dimension3', c_file.owners[0].emailAddress + ':' + c_file.owners[0].displayName);
+          ga('set', 'dimension2', Nimbus.realtime.c_file.title);
+          ga('set', 'dimension3', Nimbus.realtime.c_file.owners[0].emailAddress + ':' + Nimbus.realtime.c_file.owners[0].displayName);
           ga('set', 'dimension4', foundry._models.User.all());
         });
       },
@@ -1109,7 +1111,7 @@
         }
         self = this;
         Nimbus.Client.GDrive.insertFile("", name, 'application/vnd.google-apps.drive-sdk', null, function(data) {
-          window.app_files.push(data);
+          Nimbus.realtime.app_files.push(data);
           self._app_files.push(data);
           callback(data);
           angular.element(document).scope().$apply();
@@ -1122,10 +1124,10 @@
         });
       },
       current: function() {
-        return window.c_file;
+        return Nimbus.realtime.c_file;
       },
       is_current: function(doc) {
-        return doc.id === window.c_file.id;
+        return doc.id === Nimbus.realtime.c_file.id;
       },
       rename: function(doc, name, cb) {
         var id, old_name, param, request, self;
@@ -1144,14 +1146,14 @@
           },
           callback: function(file) {
             var apply_changes, folder, index, query, rename_folder, _file, _ref;
-            _ref = window.app_files;
+            _ref = Nimbus.realtime.app_files;
             for (index in _ref) {
               _file = _ref[index];
               if (doc.id === _file.id) {
                 file.title = name;
               }
             }
-            folder = window.folder.binary_files;
+            folder = Nimbus.realtime.folder.binary_files;
             apply_changes = function(changed_file) {
               if (cb) {
                 cb(changed_file);
@@ -1212,7 +1214,7 @@
       },
       del_doc: function(doc, callback) {
         var file, index, _ref, _ref1;
-        if (doc.id === c_file.id) {
+        if (doc.id === Nimbus.realtime.c_file.id) {
           return;
         }
         Nimbus.Client.GDrive.deleteFile(doc.id);
@@ -1223,11 +1225,11 @@
             this._app_files.splice(index, 1);
           }
         }
-        _ref1 = window.app_files;
+        _ref1 = Nimbus.realtime.app_files;
         for (index in _ref1) {
           file = _ref1[index];
           if (doc.id === file.id) {
-            window.app_files.splice(index, 1);
+            Nimbus.realtime.app_files.splice(index, 1);
           }
         }
       }

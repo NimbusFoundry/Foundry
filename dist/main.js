@@ -21984,42 +21984,50 @@ e.executeSql(t,[],function(e,t){for(var n=[],r=[],o=0;o<t.rows.length;o++){var i
 return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.length;r>n;n++){var o=e[n];if("number"!=typeof o){if(!Array.isArray(o))throw a("_sum");t="number"==typeof t?[t]:t;for(var i=0,s=o.length;s>i;i++){var u=o[i];if("number"!=typeof u)throw a("_sum");"undefined"==typeof t[i]?t.push(u):t[i]+=u}}else"number"==typeof t?t+=o:t[0]+=o}return t}function c(e,t,n,r){var o=t[e];"undefined"!=typeof o&&(r&&(o=encodeURIComponent(JSON.stringify(o))),n.push(e+"="+o))}function d(e,t){var n=e.descending?"endkey":"startkey",r=e.descending?"startkey":"endkey";if("undefined"!=typeof e[n]&&"undefined"!=typeof e[r]&&E(e[n],e[r])>0)throw new _("No rows can match your key range, reverse your start_key and end_key or set {descending : true}");if(t.reduce&&e.reduce!==!1){if(e.include_docs)throw new _("{include_docs:true} is invalid for reduce");if(e.keys&&e.keys.length>1&&!e.group&&!e.group_level)throw new _("Multi-key fetches for reduce views must use {group: true}")}if(e.group_level){if("number"!=typeof e.group_level)throw new _('Invalid value for integer: "'+e.group_level+'"');if(e.group_level<0)throw new _('Invalid value for positive integer: "'+e.group_level+'"')}}function l(e,t,n){var o,i=[],s="GET";if(c("reduce",n,i),c("include_docs",n,i),c("limit",n,i),c("descending",n,i),c("group",n,i),c("group_level",n,i),c("skip",n,i),c("startkey",n,i,!0),c("endkey",n,i,!0),c("inclusive_end",n,i),c("key",n,i,!0),i=i.join("&"),i=""===i?"":"?"+i,"undefined"!=typeof n.keys){var a=2e3,u="keys="+encodeURIComponent(JSON.stringify(n.keys));u.length+i.length+1<=a?i+=("?"===i[0]?"&":"?")+u:(s="POST","string"==typeof t?o=JSON.stringify({keys:n.keys}):t.keys=n.keys)}if("string"==typeof t){var d=r(t);return e.request({method:s,url:"_design/"+d[0]+"/_view/"+d[1]+i,body:o})}return o=o||{},Object.keys(t).forEach(function(e){o[e]=Array.isArray(t[e])?t[e]:t[e].toString()}),e.request({method:"POST",url:"_temp_view"+i,body:o})}function f(e){return function(t){if("not_found"===t.name)return e;throw t}}function p(e,t,n){var r="_local/doc_"+e;return t.db.get(r)["catch"](f({_id:r,keys:[]})).then(function(r){return t.db.allDocs({keys:r.keys,include_docs:!0}).then(function(t){var o=t.rows.map(function(e){return e.doc}).filter(function(e){return e}),i=n[e],s={};o.forEach(function(e){s[e._id]=!0,e._deleted=!i[e._id],e._deleted||(e.value=i[e._id])});var a=Object.keys(i);return a.forEach(function(e){s[e]||o.push({_id:e,value:i[e]})}),r.keys=T.uniq(a.concat(r.keys)),o.splice(0,0,r),o})})}function h(e,t,n){var r="_local/lastSeq";return e.db.get(r)["catch"](f({_id:r,seq:0})).then(function(r){var o=Object.keys(t);return O.all(o.map(function(n){return p(n,e,t)})).then(function(t){var o=[];return t.forEach(function(e){o=o.concat(e)}),r.seq=n,o.push(r),e.db.bulkDocs({docs:o})})})}function v(e,t,n){0===n.group_level&&delete n.group_level;var r,i=n.group||n.group_level;r=A[e.reduceFun]?A[e.reduceFun]:x(e.reduceFun.toString(),null,u,g,Array.isArray,JSON.parse);var a=[],c=n.group_level;t.forEach(function(e){var t=a[a.length-1],n=i?e.key:null;return i&&Array.isArray(n)&&"number"==typeof c&&(n=n.length>c?n.slice(0,c):n),t&&0===E(t.key[0][0],n)?(t.key.push([n,e.id]),void t.value.push(e.value)):void a.push({key:[[n,e.id]],value:[e.value]})});for(var d=0,l=a.length;l>d;d++){var f=a[d],p=o(e.sourceDB,r,[f.key,f.value,!1]);f.value=p.error?null:p.output,f.key=f.key[0][0]}return{rows:s(a,n.limit,n.skip)}}function m(e){return e.request({method:"POST",url:"_view_cleanup"})}function y(e,t,n){if("http"===e.type())return l(e,t,n);if("string"!=typeof t){d(n,t);var o={db:e,viewName:"temp_view/temp_view",map:t.map,reduce:t.reduce,temporary:!0};return R.add(function(){return q(o).then(function(e){function t(){return e.db.destroy()}return T.fin(C(e).then(function(){return I(e,n)}),t)})}),R.finish()}var i=t,s=r(i),a=s[0],u=s[1];return e.get("_design/"+a).then(function(t){var r=t.views&&t.views[u];if(!r||"string"!=typeof r.map){var o=new Error("ddoc "+a+" has no view named "+u);throw o.name="not_found",o.status=400,o}d(n,r);var s={db:e,viewName:i,map:r.map,reduce:r.reduce};return q(s).then(function(e){return"ok"===n.stale||"update_after"===n.stale?("update_after"===n.stale&&C(e),I(e,n)):C(e).then(function(){return I(e,n)})})})}function _(e){this.status=400,this.name="query_parse_error",this.message=e,this.error=!0;try{Error.captureStackTrace(this,_)}catch(t){}}var g,b=e("pouchdb-collate"),w=e("./taskqueue"),E=b.collate,S=b.toIndexableString,k=b.normalizeKey,q=e("./create-view"),x=e("./evalfunc");g="undefined"!=typeof console&&"function"==typeof console.log?Function.prototype.bind.call(console.log,console):function(){};var T=e("./utils"),O=T.Promise,D=new w,R=new w,L=50,A={_sum:function(e,t){return u(t)},_count:function(e,t){return t.length},_stats:function(e,t){function n(e){for(var t=0,n=0,r=e.length;r>n;n++){var o=e[n];t+=o*o}return t}return{sum:u(t),min:Math.min.apply(null,t),max:Math.max.apply(null,t),count:t.length,sumsqr:n(t)}}},C=T.sequentialize(D,function(e){function t(e,t){r.push({id:s._id,key:k(e),value:k(t)})}function n(t,n){return function(){return h(e,t,n)}}var r,s,a;if("function"==typeof e.mapFun&&2===e.mapFun.length){var c=e.mapFun;a=function(e){return c(e,t)}}else a=x(e.mapFun.toString(),t,u,g,Array.isArray,JSON.parse);var d=e.seq||0,l=new w;return new O(function(t,u){function c(){l.finish().then(function(){e.seq=d,t()})}function f(){function t(e){u(e)}e.sourceDB.changes({conflicts:!0,include_docs:!0,since:d,limit:L}).on("complete",function(t){var u=t.results;if(!u.length)return c();for(var p={},h=0,v=u.length;v>h;h++){var m=u[h];if("_"!==m.doc._id[0]){r=[],s=m.doc,s._deleted||o(e.sourceDB,a,[s]),r.sort(i);for(var y={},_=0,g=r.length;g>_;_++){var b=r[_],w=S([b.key,b.id,_]);y[w]=b}p[m.doc._id]=y}d=m.seq}return l.add(n(p,d)),u.length<L?c():f()}).on("error",t)}f()})}),I=T.sequentialize(D,function(e,t){function n(t){return t.include_docs=!0,e.db.allDocs(t).then(function(e){return o=e.total_rows,e.rows.map(function(e){return e.doc.value})})}function r(n){var r;if(r=i?v(e,n,t):{total_rows:o,offset:s,rows:n},t.include_docs){var a=n.map(function(t){var n=t.value,r=n&&"object"==typeof n&&n._id||t.id;return e.sourceDB.get(r).then(function(e){t.doc=e},function(){})});return O.all(a).then(function(){return r})}return r}var o,i=e.reduceFun&&t.reduce!==!1,s=t.skip||0;"undefined"==typeof t.keys||t.keys.length||(t.limit=0,delete t.keys);var a=function(e){return e.reduce(function(e,t){return e.concat(t)})};if("undefined"!=typeof t.keys){var u=t.keys,c=u.map(function(e){var t={startkey:S([e]),endkey:S([e,{}])};return n(t)});return O.all(c).then(a).then(r)}var d={descending:t.descending};if("undefined"!=typeof t.startkey&&(d.startkey=S(t.descending?[t.startkey,{}]:[t.startkey])),"undefined"!=typeof t.endkey){var l=t.inclusive_end!==!1;t.descending&&(l=!l),d.endkey=S(l?[t.endkey,{}]:[t.endkey])}if("undefined"!=typeof t.key){var f=S([t.key]),p=S([t.key,{}]);d.descending?(d.endkey=f,d.startkey=p):(d.startkey=f,d.endkey=p)}return i||("number"==typeof t.limit&&(d.limit=t.limit),d.skip=s),n(d).then(r)}),N=T.sequentialize(D,function(e){return e.get("_local/mrviews").then(function(t){var n={};Object.keys(t.views).forEach(function(e){var t=r(e),o="_design/"+t[0],i=t[1];n[o]=n[o]||{},n[o][i]=!0});var o={keys:Object.keys(n),include_docs:!0};return e.allDocs(o).then(function(r){var o={};r.rows.forEach(function(e){var r=e.key.substring(8);Object.keys(n[e.key]).forEach(function(n){var i=r+"/"+n;t.views[i]||(i=n);var s=Object.keys(t.views[i]),a=e.doc&&e.doc.views&&e.doc.views[n];s.forEach(function(e){o[e]=o[e]||a})})});var i=Object.keys(o).filter(function(e){return!o[e]}),s=i.map(function(t){return e.constructor.destroy(t,{adapter:e.adapter})});return O.all(s).then(function(){return{ok:!0}})})},f({ok:!0}))});n.viewCleanup=T.callbackify(function(){var e=this;return"http"===e.type()?m(e):N(e)}),n.query=function(e,t,n){"function"==typeof t&&(n=t,t={}),t=T.extend({},t),"function"==typeof e&&(e={map:e});var r=this,o=O.resolve().then(function(){return y(r,e,t)});return T.promisedCallback(o,n),o},T.inherits(_,Error)},{"./create-view":48,"./evalfunc":49,"./taskqueue":54,"./utils":56,"pouchdb-collate":52}],51:[function(e,t){function n(e){if(!e||"[object Object]"!==o.call(e)||e.nodeType||e.setInterval)return!1;var t=r.call(e,"constructor"),n=r.call(e.constructor.prototype,"isPrototypeOf");if(e.constructor&&!t&&!n)return!1;var i;for(i in e);return void 0===i||r.call(e,i)}var r=Object.prototype.hasOwnProperty,o=Object.prototype.toString;t.exports=function i(){var e,t,r,o,s,a,u=arguments[0]||{},c=1,d=arguments.length,l=!1;for("boolean"==typeof u&&(l=u,u=arguments[1]||{},c=2),"object"!=typeof u&&"function"!=typeof u&&(u={});d>c;c++)if(null!=(e=arguments[c]))for(t in e)r=u[t],o=e[t],u!==o&&(l&&o&&(n(o)||(s=Array.isArray(o)))?(s?(s=!1,a=r&&Array.isArray(r)?r:[]):a=r&&n(r)?r:{},u[t]=i(l,a,o)):void 0!==o&&(u[t]=o));return u}},{}],52:[function(e,t,n){"use strict";function r(e){if(null!==e)switch(typeof e){case"boolean":return e?1:0;case"number":return u(e);case"string":return e.replace(/\u0002/g,"").replace(/\u0001/g,"").replace(/\u0000/g,"");case"object":var t=Array.isArray(e),r=t?e:Object.keys(e),o=-1,i=r.length,s="";if(t)for(;++o<i;)s+=n.toIndexableString(r[o]);else for(;++o<i;){var a=r[o];s+=n.toIndexableString(a)+n.toIndexableString(e[a])}return s}return""}function o(e,t){for(var r=Math.min(e.length,t.length),o=0;r>o;o++){var i=n.collate(e[o],t[o]);if(0!==i)return i}return e.length===t.length?0:e.length>t.length?1:-1}function i(e,t){return e===t?0:e>t?1:-1}function s(e,t){for(var r=Object.keys(e),o=Object.keys(t),i=Math.min(r.length,o.length),s=0;i>s;s++){var a=n.collate(r[s],o[s]);if(0!==a)return a;if(a=n.collate(e[r[s]],t[o[s]]),0!==a)return a}return r.length===o.length?0:r.length>o.length?1:-1}function a(e){var t=["boolean","number","string","object"],n=t.indexOf(typeof e);return~n?null===e?1:Array.isArray(e)?5:3>n?n+2:n+3:Array.isArray(e)?5:void 0}function u(e){if(0===e)return"1";var t=e.toExponential().split(/e\+?/),n=parseInt(t[1],10),r=0>e,o=r?"0":"2",i=(r?-n:n)-c,s=f.padLeft(i.toString(),"0",d);o+=l+s;var a=Math.abs(parseFloat(t[0]));r&&(a=10-a);var u=a.toFixed(20);return u=u.replace(/\.?0+$/,""),o+=l+u}var c=-324,d=3,l="",f=e("./utils");n.collate=function(e,t){if(e===t)return 0;e=n.normalizeKey(e),t=n.normalizeKey(t);var r=a(e),u=a(t);if(r-u!==0)return r-u;if(null===e)return 0;switch(typeof e){case"number":return e-t;case"boolean":return e===t?0:t>e?-1:1;case"string":return i(e,t)}return Array.isArray(e)?o(e,t):s(e,t)},n.normalizeKey=function(e){switch(typeof e){case"undefined":return null;case"number":return 1/0===e||e===-1/0||isNaN(e)?null:e;case"object":var t=e;if(Array.isArray(e)){var r=e.length;e=new Array(r);for(var o=0;r>o;o++)e[o]=n.normalizeKey(t[o])}else{if(e instanceof Date)return e.toJSON();if(null!==e){e={};for(var i in t)if(t.hasOwnProperty(i)){var s=t[i];"undefined"!=typeof s&&(e[i]=n.normalizeKey(s))}}}}return e},n.toIndexableString=function(e){var t="\x00";return e=n.normalizeKey(e),a(e)+l+r(e)+t}},{"./utils":53}],53:[function(e,t,n){"use strict";function r(e,t,n){for(var r="",o=n-e.length;r.length<o;)r+=t;return r}n.padLeft=function(e,t,n){var o=r(e,t,n);return o+e},n.padRight=function(e,t,n){var o=r(e,t,n);return e+o},n.stringLexCompare=function(e,t){var n,r=e.length,o=t.length;for(n=0;r>n;n++){if(n===o)return 1;var i=e.charAt(n),s=t.charAt(n);if(i!==s)return s>i?-1:1}return o>r?-1:0},n.intToDecimalForm=function(e){var t=0>e,n="";do{var r=t?-Math.ceil(e%10):Math.floor(e%10);n=r+n,e=t?Math.ceil(e/10):Math.floor(e/10)}while(e);return t&&"0"!==n&&(n="-"+n),n}},{}],54:[function(e,t){"use strict";function n(){this.promise=new r(function(e){e()})}var r=e("./utils").Promise;n.prototype.add=function(e){return this.promise=this.promise["catch"](function(){}).then(function(){return e()}),this.promise},n.prototype.finish=function(){return this.promise},t.exports=n},{"./utils":56}],55:[function(e,t){"use strict";function n(e,t,n){return new o(function(o,i){return t&&"object"==typeof t&&(t=t._id),"string"!=typeof t?i(new Error("doc id is required")):void e.get(t,function(s,a){if(s)return"not_found"!==s.name?i(s):o(r(e,n({_id:t}),n));var u=n(a);return u?void o(r(e,u,n)):o(a)})})}function r(e,t,r){return e.put(t)["catch"](function(o){if("conflict"!==o.name)throw o;return n(e,t,r)})}var o=e("./utils").Promise;t.exports=n},{"./utils":56}],56:[function(e,t,n){(function(t,r){"use strict";n.Promise="function"==typeof r.Promise?r.Promise:e("lie"),n.uniq=function(e){var t={};return e.forEach(function(e){t[e]=!0}),Object.keys(t)},n.inherits=e("inherits"),n.extend=e("extend");var o=e("argsarray");n.promisedCallback=function(e,n){return n&&e.then(function(e){t.nextTick(function(){n(null,e)})},function(e){t.nextTick(function(){n(e)})}),e},n.callbackify=function(e){return o(function(t){var r=t.pop(),o=e.apply(this,t);return"function"==typeof r&&n.promisedCallback(o,r),o})},n.fin=function(e,t){return e.then(function(e){var n=t();return"function"==typeof n.then?n.then(function(){return e}):e},function(e){var n=t();if("function"==typeof n.then)return n.then(function(){throw e});throw e})},n.sequentialize=function(e,t){return function(){var n=arguments,r=this;return e.add(function(){return t.apply(r,n)})}};var i=e("crypto"),s=e("md5-jkmyers");n.MD5=function(e){return t.browser?s(e):i.createHash("md5").update(e).digest("hex")}}).call(this,e("/Users/daleharvey/src/pouchdb/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),"undefined"!=typeof self?self:"undefined"!=typeof window?window:{})},{"/Users/daleharvey/src/pouchdb/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":26,argsarray:23,crypto:24,extend:51,inherits:27,lie:32,"md5-jkmyers":46}]},{},[15])(15)});
 // Generated by CoffeeScript 1.8.0
 (function() {
-  var DelayedOp, DelayedSyncAnimation, Dropbox, DropboxClient, DropboxOauth, DropboxXhr, DropboxXhrCanSendForms, DropboxXhrIeMode, DropboxXhrRequest, OneOp, REALTIME_MIMETYPE, Set, add32, arrayToBase64, atob, atobNibble, base64Digits, base64HmacSha1, base64Sha1, baseUrl, btoa, btoaNibble, crypto, dropboxEncodeKey, exports, handleErrors, hmacSha1, mixpanel_token, realTimeEvents, rotateLeft32, sha1, stringToArray, _base64Digits,
+  var $, Auth, Binary, Class, Client, DB, DelayedOp, DelayedSyncAnimation, Dropbox, DropboxClient, DropboxOauth, DropboxXhr, DropboxXhrCanSendForms, DropboxXhrIeMode, DropboxXhrRequest, Events, Model, Nimbus, OneOp, REALTIME_MIMETYPE, Set, Share, add32, arrayToBase64, atob, atobNibble, base64Digits, base64HmacSha1, base64Sha1, baseUrl, btoa, btoaNibble, crypto, dropboxEncodeKey, exports, handleErrors, headID, hmacSha1, isArray, makeArray, mixpanel_token, moduleKeywords, newScript, realTimeEvents, rotateLeft32, sha1, stringToArray, _base64Digits,
     __hasProp = {}.hasOwnProperty,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __slice = [].slice,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-  (function() {
-    var Nimbus, headID, newScript;
-    if (window.Nimbus == null) {
-      window.Nimbus = {};
-    }
-    Nimbus = window.Nimbus;
-    window.handle_initialization = null;
-    Nimbus.loaded = false;
-    window.handleClientLoad = function() {
-      console.log("loaded CALLED");
-      Nimbus.loaded = true;
-      Nimbus.gapi_loaded = false;
-      Nimbus.gapi_loaded_callback = function() {
-        return console.log('the orginal gapi callback');
-      };
-      gapi.load("auth:client,drive-realtime,drive-share", function() {
-        log("gapi for everything loaded");
-        Nimbus.gapi_loaded = true;
-        return Nimbus.gapi_loaded_callback();
-      });
-      if (Nimbus.gdrive_initialized) {
-        return Nimbus.Auth.initialize();
-      }
+  if (window.Nimbus == null) {
+    window.Nimbus = {};
+  }
+
+  Nimbus = window.Nimbus;
+
+  Nimbus.realtime = {};
+
+  window.handle_initialization = null;
+
+  Nimbus.loaded = false;
+
+  window.handleClientLoad = function() {
+    console.log("loaded CALLED");
+    Nimbus.loaded = true;
+    Nimbus.gapi_loaded = false;
+    Nimbus.gapi_loaded_callback = function() {
+      return console.log('the orginal gapi callback');
     };
-    headID = document.getElementsByTagName("head")[0];
-    newScript = document.createElement("script");
-    newScript.type = "text/javascript";
-    newScript.src = "https://apis.google.com/js/client.js?onload=handleClientLoad";
-    return headID.appendChild(newScript);
-  })();
+    gapi.load("auth:client,drive-realtime,drive-share", function() {
+      log("gapi for everything loaded");
+      Nimbus.gapi_loaded = true;
+      return Nimbus.gapi_loaded_callback();
+    });
+    if (Nimbus.gdrive_initialized) {
+      return Nimbus.Auth.initialize();
+    }
+  };
+
+  headID = document.getElementsByTagName("head")[0];
+
+  newScript = document.createElement("script");
+
+  newScript.type = "text/javascript";
+
+  newScript.src = "https://apis.google.com/js/client.js?onload=handleClientLoad";
+
+  headID.appendChild(newScript);
 
   Dropbox = (function() {
     function Dropbox(options) {
@@ -24127,861 +24135,888 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
 
   Dropbox.encodeKey = dropboxEncodeKey;
 
-  (function() {
-    var $, Auth, Binary, Class, Client, DB, Events, Model, Nimbus, Share, isArray, makeArray, moduleKeywords;
-    if (window.Nimbus == null) {
-      Nimbus = winodw.Nimbus = {};
-    }
-    Nimbus = window.Nimbus;
-    Nimbus.version = "0.0.1";
-    $ = Nimbus.$ = this.jQuery || this.Zepto || function() {
-      return arguments[0];
-    };
-    Nimbus.dictModel = {};
-    makeArray = function(args) {
-      return Array.prototype.slice.call(args, 0);
-    };
-    isArray = function(value) {
-      return Object.prototype.toString.call(value) === "[object Array]";
-    };
-    if (typeof Array.prototype.indexOf === "undefined") {
-      Array.prototype.indexOf = function(value) {
-        var i;
-        i = 0;
-        while (i < this.length) {
-          if (this[i] === value) {
-            return i;
-          }
-          i++;
+  if (window.Nimbus == null) {
+    Nimbus = winodw.Nimbus = {};
+  }
+
+  Nimbus = window.Nimbus;
+
+  Nimbus.version = "0.0.1";
+
+  $ = Nimbus.$ = this.jQuery || this.Zepto || function() {
+    return arguments[0];
+  };
+
+  Nimbus.dictModel = {};
+
+  makeArray = function(args) {
+    return Array.prototype.slice.call(args, 0);
+  };
+
+  isArray = function(value) {
+    return Object.prototype.toString.call(value) === "[object Array]";
+  };
+
+  if (typeof Array.prototype.indexOf === "undefined") {
+    Array.prototype.indexOf = function(value) {
+      var i;
+      i = 0;
+      while (i < this.length) {
+        if (this[i] === value) {
+          return i;
         }
-        return -1;
-      };
-    }
-    Events = {
-      bind: function(ev, callback) {
-        var calls, evs, i;
-        evs = ev.split(" ");
-        calls = this._callbacks || (this._callbacks = {});
-        i = 0;
-        while (i < evs.length) {
-          (this._callbacks[evs[i]] || (this._callbacks[evs[i]] = [])).push(callback);
-          i++;
-        }
-        return this;
-      },
-      trigger: function() {
-        var args, calls, ev, i, l, list;
-        args = makeArray(arguments);
-        ev = args.shift();
-        if (!(calls = this._callbacks)) {
+        i++;
+      }
+      return -1;
+    };
+  }
+
+  Events = {
+    bind: function(ev, callback) {
+      var calls, evs, i;
+      evs = ev.split(" ");
+      calls = this._callbacks || (this._callbacks = {});
+      i = 0;
+      while (i < evs.length) {
+        (this._callbacks[evs[i]] || (this._callbacks[evs[i]] = [])).push(callback);
+        i++;
+      }
+      return this;
+    },
+    trigger: function() {
+      var args, calls, ev, i, l, list;
+      args = makeArray(arguments);
+      ev = args.shift();
+      if (!(calls = this._callbacks)) {
+        return false;
+      }
+      if (!(list = this._callbacks[ev])) {
+        return false;
+      }
+      i = 0;
+      l = list.length;
+      while (i < l) {
+        if (list[i].apply(this, args) === false) {
           return false;
         }
-        if (!(list = this._callbacks[ev])) {
+        i++;
+      }
+      return true;
+    },
+    unbind: function(ev, callback) {
+      var calls, i, l, list;
+      if (!ev) {
+        this._callbacks = {};
+        return this;
+      }
+      if (!(calls = this._callbacks)) {
+        return this;
+      }
+      if (!(list = calls[ev])) {
+        return this;
+      }
+      if (!callback) {
+        delete this._callbacks[ev];
+        return this;
+      }
+      i = 0;
+      l = list.length;
+      while (i < l) {
+        if (callback === list[i]) {
+          list = list.slice();
+          list.splice(i, 1);
+          calls[ev] = list;
+          break;
+        }
+        i++;
+      }
+      return this;
+    }
+  };
+
+  if (typeof Object.create !== "function") {
+    Object.create = function(o) {
+      var F;
+      F = function() {};
+      F.prototype = o;
+      return new F();
+    };
+  }
+
+  moduleKeywords = ["included", "extended"];
+
+  Class = {
+    inherited: function() {},
+    created: function() {},
+    prototype: {
+      initialize: function() {},
+      init: function() {}
+    },
+    create: function(include, extend) {
+      var object;
+      object = Object.create(this);
+      object.parent = this;
+      object.prototype = object.fn = Object.create(this.prototype);
+      if (include) {
+        object.include(include);
+      }
+      if (extend) {
+        object.extend(extend);
+      }
+      object.created();
+      this.inherited(object);
+      return object;
+    },
+    init: function() {
+      var instance;
+      instance = Object.create(this.prototype);
+      instance.parent = this;
+      instance.initialize.apply(instance, arguments);
+      instance.init.apply(instance, arguments);
+      return instance;
+    },
+    proxy: function(func) {
+      var thisObject;
+      thisObject = this;
+      return function() {
+        return func.apply(thisObject, arguments);
+      };
+    },
+    proxyAll: function() {
+      var functions, i, _results;
+      functions = makeArray(arguments);
+      i = 0;
+      _results = [];
+      while (i < functions.length) {
+        this[functions[i]] = this.proxy(this[functions[i]]);
+        _results.push(i++);
+      }
+      return _results;
+    },
+    include: function(obj) {
+      var included, key;
+      for (key in obj) {
+        if (moduleKeywords.indexOf(key) === -1) {
+          this.fn[key] = obj[key];
+        }
+      }
+      included = obj.included;
+      if (included) {
+        included.apply(this);
+      }
+      return this;
+    },
+    extend: function(obj) {
+      var extended, key;
+      for (key in obj) {
+        if (moduleKeywords.indexOf(key) === -1) {
+          this[key] = obj[key];
+        }
+      }
+      extended = obj.extended;
+      if (extended) {
+        extended.apply(this);
+      }
+      return this;
+    }
+  };
+
+  Class.prototype.proxy = Class.proxy;
+
+  Class.prototype.proxyAll = Class.proxyAll;
+
+  Class.inst = Class.init;
+
+  Class.sub = Class.create;
+
+  Nimbus.guid = function() {
+    var id, verified, verify_guide;
+    verify_guide = function(g_id) {
+      var x, y, _ref;
+      _ref = Nimbus.dictModel;
+      for (x in _ref) {
+        y = _ref[x];
+        if (y.exists(g_id)) {
           return false;
         }
-        i = 0;
-        l = list.length;
-        while (i < l) {
-          if (list[i].apply(this, args) === false) {
-            return false;
-          }
-          i++;
-        }
-        return true;
-      },
-      unbind: function(ev, callback) {
-        var calls, i, l, list;
-        if (!ev) {
-          this._callbacks = {};
-          return this;
-        }
-        if (!(calls = this._callbacks)) {
-          return this;
-        }
-        if (!(list = calls[ev])) {
-          return this;
-        }
-        if (!callback) {
-          delete this._callbacks[ev];
-          return this;
-        }
-        i = 0;
-        l = list.length;
-        while (i < l) {
-          if (callback === list[i]) {
-            list = list.slice();
-            list.splice(i, 1);
-            calls[ev] = list;
-            break;
-          }
-          i++;
-        }
-        return this;
       }
+      return true;
     };
-    if (typeof Object.create !== "function") {
-      Object.create = function(o) {
-        var F;
-        F = function() {};
-        F.prototype = o;
-        return new F();
-      };
+    verified = false;
+    while (!verified) {
+      id = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
+        var r, v;
+        r = Math.random() * 16 | 0;
+        v = (c === "x" ? r : r & 0x3 | 0x8);
+        return v.toString(16);
+      }).toUpperCase();
+      verified = verify_guide(id);
     }
-    moduleKeywords = ["included", "extended"];
-    Class = {
-      inherited: function() {},
-      created: function() {},
-      prototype: {
-        initialize: function() {},
-        init: function() {}
-      },
-      create: function(include, extend) {
-        var object;
-        object = Object.create(this);
-        object.parent = this;
-        object.prototype = object.fn = Object.create(this.prototype);
-        if (include) {
-          object.include(include);
-        }
-        if (extend) {
-          object.extend(extend);
-        }
-        object.created();
-        this.inherited(object);
-        return object;
-      },
-      init: function() {
-        var instance;
-        instance = Object.create(this.prototype);
-        instance.parent = this;
-        instance.initialize.apply(instance, arguments);
-        instance.init.apply(instance, arguments);
-        return instance;
-      },
-      proxy: function(func) {
-        var thisObject;
-        thisObject = this;
-        return function() {
-          return func.apply(thisObject, arguments);
-        };
-      },
-      proxyAll: function() {
-        var functions, i, _results;
-        functions = makeArray(arguments);
-        i = 0;
-        _results = [];
-        while (i < functions.length) {
-          this[functions[i]] = this.proxy(this[functions[i]]);
-          _results.push(i++);
-        }
-        return _results;
-      },
-      include: function(obj) {
-        var included, key;
-        for (key in obj) {
-          if (moduleKeywords.indexOf(key) === -1) {
-            this.fn[key] = obj[key];
-          }
-        }
-        included = obj.included;
-        if (included) {
-          included.apply(this);
-        }
-        return this;
-      },
-      extend: function(obj) {
-        var extended, key;
-        for (key in obj) {
-          if (moduleKeywords.indexOf(key) === -1) {
-            this[key] = obj[key];
-          }
-        }
-        extended = obj.extended;
-        if (extended) {
-          extended.apply(this);
-        }
-        return this;
-      }
-    };
-    Class.prototype.proxy = Class.proxy;
-    Class.prototype.proxyAll = Class.proxyAll;
-    Class.inst = Class.init;
-    Class.sub = Class.create;
-    Nimbus.guid = function() {
-      var id, verified, verify_guide;
-      verify_guide = function(g_id) {
-        var x, y, _ref;
-        _ref = Nimbus.dictModel;
-        for (x in _ref) {
-          y = _ref[x];
-          if (y.exists(g_id)) {
-            return false;
-          }
-        }
-        return true;
-      };
-      verified = false;
-      while (!verified) {
-        id = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
-          var r, v;
-          r = Math.random() * 16 | 0;
-          v = (c === "x" ? r : r & 0x3 | 0x8);
-          return v.toString(16);
-        }).toUpperCase();
-        verified = verify_guide(id);
-      }
-      return id;
-    };
-    Auth = Nimbus.Auth = Class.create();
-    Auth.extend({
-      reinitialize: function() {
-        var cloud, service, sync_service;
-        log("reintialize called");
-        if (localStorage["last_sync_object"] != null) {
-          log("the service exists", localStorage["service"]);
-          sync_service = JSON.parse(localStorage["last_sync_object"]);
-          if (Nimbus.Auth.sync_services == null) {
-            Nimbus.Auth.sync_services = {};
-            Nimbus.Auth.sync_services.synchronous = sync_service.synchronous;
-          } else {
-            service = Nimbus.Auth.sync_services[sync_service.service];
-            if (service.app_id !== sync_service.app_id) {
-              cloud = sync_service.service;
-              sync_service = service;
-              sync_service.service = cloud;
-              localStorage.clear();
-            }
-          }
-          this.setup(sync_service);
-          return this.initialize();
-        }
-      },
-      setup: function(sync_service) {
-        var item, key, service, value;
-        if (typeof sync_service === "string") {
-          console.log("Current sync service", sync_service);
-          sync_service = JSON.parse(Base64.decode(sync_service));
-        }
-        if (!this.app_name) {
-          this.app_name = sync_service.app_name;
-        }
-        if (!this.app_name) {
-          for (item in sync_service) {
-            if (sync_service[item].app_name) {
-              this.app_name = sync_service[item].app_name;
-              if (this.app_name) {
-                break;
-              }
-            }
-          }
-        }
-        if (sync_service.service != null) {
-          log("setup called on a service", sync_service.service);
-          log("setup object", sync_service);
-          for (key in sync_service) {
-            value = sync_service[key];
-            this[key] = value;
-          }
-          if ((Nimbus.Auth.sync_services != null) && (Nimbus.Auth.sync_services.synchronous != null)) {
-            sync_service.synchronous = Nimbus.Auth.sync_services.synchronous;
-          } else {
-            sync_service.synchronous = true;
-          }
-          sync_service.app_name = this.app_name;
-          localStorage["last_sync_object"] = JSON.stringify(sync_service);
-          if (!sync_service.synchronous) {
-            Nimbus.Model.Local.async_doc_setup();
-          }
-          switch (this.service) {
-            case "Dropbox":
-              this.extend(Nimbus.Auth.Dropbox_auth);
-              this._authorize = this.proxy(this.authenticate_dropbox);
-              this.initialize = this.proxy(this.initialize_dropbox);
-              this.authorized = this.proxy(this.dropbox_authorized);
-              this.logout = function() {
-                this.proxy(this.logout_dropbox);
-                this.clear_storage();
-              };
-              Nimbus.Binary.setup(this.service);
-              log("service is dropbox");
-              break;
-            case "GDrive":
-              this.extend(Nimbus.Auth.GDrive);
-              this.init_scope();
-              this._authorize = this.proxy(this.authenticate_gdrive);
-              this.initialize = this.proxy(this.initialize_gdrive);
-              this.authorized = this.proxy(this.gdrive_authorized);
-              this.logout = function() {
-                this.proxy(this.logout_gdrive);
-                this.clear_storage();
-              };
-              Nimbus.Binary.setup(this.service);
-              log("service is GDrive");
-              Nimbus.Share.setup(this.service);
-              break;
-            case "Realtime":
-              startRealtime(key, app_name);
-              break;
-            default:
-              log("Invalid service name");
-          }
+    return id;
+  };
+
+  Auth = Nimbus.Auth = Class.create();
+
+  Auth.extend({
+    reinitialize: function() {
+      var cloud, service, sync_service;
+      log("reintialize called");
+      if (localStorage["last_sync_object"] != null) {
+        log("the service exists", localStorage["service"]);
+        sync_service = JSON.parse(localStorage["last_sync_object"]);
+        if (Nimbus.Auth.sync_services == null) {
+          Nimbus.Auth.sync_services = {};
+          Nimbus.Auth.sync_services.synchronous = sync_service.synchronous;
         } else {
-          log("new method for setup, the service is there");
-          this.sync_services = sync_service;
-          this.models = {};
-          if (localStorage["service"] != null) {
-            if (localStorage["service"] === "GDrive") {
-              service = this.sync_services["GDrive"];
-              service["service"] = "GDrive";
-              this.setup(service);
-            } else {
-              service = this.sync_services["Dropbox"];
-              service["service"] = "Dropbox";
-              this.setup(service);
-            }
-          } else {
-            this.extend(Nimbus.Auth.Multi);
-            this._authorize = this.proxy(this.authenticate_service);
-            this.initialize = this.proxy(this.initialize_service);
-          }
-        }
-        this.authorize = function(type) {
-          var obj;
-          if (this.service && type && type !== this.service) {
+          service = Nimbus.Auth.sync_services[sync_service.service];
+          if (service.app_id !== sync_service.app_id) {
+            cloud = sync_service.service;
+            sync_service = service;
+            sync_service.service = cloud;
             localStorage.clear();
-            obj = this.sync_object[type];
-            obj.service = type;
-            this.setup(obj);
           }
-          return this._authorize(type);
-        };
-      },
-      clear_storage: function() {
-        log('Will clear localStorage or indexedDB');
-        localStorage.clear();
-        PouchDB.destroy(this.app_name);
-      },
-      authorized: function() {
-        return log("authorized not yet setup");
-      },
-      state: function() {
-        return localStorage["state"];
-      },
-      authorize: function() {
-        return log("authorize not yet setup");
-      },
-      initialize: function() {
-        return log("initialize not setup");
-      },
-      authorized_callback: function() {
-        return log("authorized callback undefined");
-      },
-      app_ready_func: function() {
-        log("app_ready");
-        return this.app_ready = true;
-      },
-      set_app_ready: function(callback) {
-        var cb;
-        log("set app ready");
-        if ((this.app_ready != null) && this.app_ready) {
-          if (this.service === 'GDrive') {
-            return window.folder_initialize(callback);
-          } else {
-            return callback();
-          }
-        } else {
-          cb = function() {
-            if (this.service === 'GDrive') {
-              return window.folder_initialize(callback);
-            } else {
-              return callback();
+        }
+        this.setup(sync_service);
+        return this.initialize();
+      }
+    },
+    setup: function(sync_service) {
+      var item, key, service, value;
+      if (typeof sync_service === "string") {
+        console.log("Current sync service", sync_service);
+        sync_service = JSON.parse(Base64.decode(sync_service));
+      }
+      if (!this.app_name) {
+        this.app_name = sync_service.app_name;
+      }
+      if (!this.app_name) {
+        for (item in sync_service) {
+          if (sync_service[item].app_name) {
+            this.app_name = sync_service[item].app_name;
+            if (this.app_name) {
+              break;
             }
-          };
-          return this.app_ready_func = cb;
-        }
-      },
-      logout: function() {
-        return log("logout not implemented");
-      }
-    });
-    Client = Nimbus.Client = Class.create();
-    Share = Nimbus.Share = Class.create();
-    Share.extend({
-      setup: function(sync_service) {
-        switch (sync_service) {
-          case "GDrive":
-            log("share api with GDrive");
-            this.extend(Nimbus.Client.GDrive);
-            this.get_users = this.proxy(this.get_shared_users);
-            this.add_user = this.proxy(this.add_share_user);
-            this.remove_user = this.proxy(this.remove_share_user);
-            this.get_me = this.proxy(this.get_current_user);
-            this.get_spaces = this.proxy(this.get_app_folders);
-            this.switch_spaces = this.proxy(this.switch_to_app_folder);
-            return this.switch_file_real = this.proxy(this.switch_to_app_file_real);
-          default:
-            return log("share not supported with this service");
-        }
-      },
-      get_users: function() {
-        return log("users not implemented");
-      },
-      add_user: function(email) {
-        return log("add a user");
-      },
-      remove_user: function(id) {
-        return log("removed user");
-      },
-      get_me: function() {
-        return log("get currently logged user");
-      },
-      get_spaces: function() {
-        return log("get current spaces");
-      },
-      switch_spaces: function(id) {
-        return log("switch space");
-      }
-    });
-    Binary = Nimbus.Binary = Class.create();
-    Binary.extend({
-      setup: function(sync_service) {
-        log("binary setup called");
-        switch (sync_service) {
-          case "Dropbox":
-            this.extend(Nimbus.Client.Dropbox.Binary);
-            Nimbus.Client.Dropbox.Binary.binary_setup();
-            return log("service is dropbox");
-          case "GDrive":
-            this.extend(Nimbus.Client.GDrive.Binary);
-            Nimbus.Client.GDrive.Binary.binary_setup();
-            return log("service is GDrive");
-          case "Realtime":
-            return log("service is  Realtime");
-          default:
-            return log("Invalid service name");
-        }
-      },
-      upload_blob: function(blob, name, callback) {
-        return log("upload blob");
-      },
-      upload_file: function(file, callback) {
-        return log("upload blob");
-      },
-      read_file: function(binary, callback) {
-        return log("read file");
-      },
-      share_link: function(binary, callback) {
-        return log("share link");
-      },
-      direct_link: function(binary, callback) {
-        return log("direct link");
-      },
-      delete_file: function(binary) {
-        return log("delete file");
-      }
-    });
-    DB = Nimbus.DB = Class.create();
-    DB.extend(Events);
-    DB.extend({
-      setup_db: function(type) {
-        log("setup db");
-        switch (type) {
-          case "localStorage":
-            return Storage.prototype.setItem = function(key, value) {
-              if (this === window.localStorage) {
-                return log("local storage called");
-              } else {
-                return _setItem.apply(this, arguments);
-              }
-            };
+          }
         }
       }
-    });
-    Model = Nimbus.Model = Class.create();
-    Model.extend(Events);
-    Model.extend({
-      loaded: false,
-      check_loaded: function() {
-        if (this.loaded) {
-          return true;
+      if (sync_service.service != null) {
+        log("setup called on a service", sync_service.service);
+        log("setup object", sync_service);
+        for (key in sync_service) {
+          value = sync_service[key];
+          this[key] = value;
+        }
+        if ((Nimbus.Auth.sync_services != null) && (Nimbus.Auth.sync_services.synchronous != null)) {
+          sync_service.synchronous = Nimbus.Auth.sync_services.synchronous;
         } else {
-          console.log("The model is not loaded yet! Wait for the model to be done with setup.");
-          return false;
+          sync_service.synchronous = true;
         }
-      },
-      service_setup: function(model) {
-        var atts;
-        log("service setup model", model);
-        atts = model.attributes;
-        switch (Nimbus.Auth.service) {
+        sync_service.app_name = this.app_name;
+        localStorage["last_sync_object"] = JSON.stringify(sync_service);
+        if (!sync_service.synchronous) {
+          Nimbus.Model.Local.async_doc_setup();
+        }
+        switch (this.service) {
           case "Dropbox":
-            log("extend as Dropbox");
-            model.extend(Nimbus.Model.general_sync);
-            model.extend(Nimbus.Model.Dropbox);
-            atts.push("synced");
-            atts.push("time");
-            model.attributes = atts;
+            this.extend(Nimbus.Auth.Dropbox_auth);
+            this._authorize = this.proxy(this.authenticate_dropbox);
+            this.initialize = this.proxy(this.initialize_dropbox);
+            this.authorized = this.proxy(this.dropbox_authorized);
+            this.logout = function() {
+              this.proxy(this.logout_dropbox);
+              this.clear_storage();
+            };
+            Nimbus.Binary.setup(this.service);
+            log("service is dropbox");
             break;
           case "GDrive":
-            log("extend as GDrive");
-            model.extend(Nimbus.Model.general_sync);
-            model.extend(Nimbus.Model.Realtime);
-            atts.push("gid");
-            atts.push("synced");
-            atts.push("time");
-            atts.push("type");
-            model.attributes = atts;
+            this.extend(Nimbus.Auth.GDrive);
+            this.init_scope();
+            this._authorize = this.proxy(this.authenticate_gdrive);
+            this.initialize = this.proxy(this.initialize_gdrive);
+            this.authorized = this.proxy(this.gdrive_authorized);
+            this.logout = function() {
+              this.proxy(this.logout_gdrive);
+              this.clear_storage();
+            };
+            Nimbus.Binary.setup(this.service);
+            log("service is GDrive");
+            Nimbus.Share.setup(this.service);
+            break;
+          case "Realtime":
+            Nimbus.realtime.startRealtime(key, app_name);
             break;
           default:
             log("Invalid service name");
         }
-        return model;
-      },
-      setup: function(name, atts, callback) {
-        var Deletion, model;
-        log("model setup");
-        model = Model.sub();
-        if (name) {
-          model.name = name;
+      } else {
+        log("new method for setup, the service is there");
+        this.sync_services = sync_service;
+        this.models = {};
+        if (localStorage["service"] != null) {
+          if (localStorage["service"] === "GDrive") {
+            service = this.sync_services["GDrive"];
+            service["service"] = "GDrive";
+            this.setup(service);
+          } else {
+            service = this.sync_services["Dropbox"];
+            service["service"] = "Dropbox";
+            this.setup(service);
+          }
+        } else {
+          this.extend(Nimbus.Auth.Multi);
+          this._authorize = this.proxy(this.authenticate_service);
+          this.initialize = this.proxy(this.initialize_service);
         }
-        if (atts) {
+      }
+      this.authorize = function(type) {
+        var obj;
+        if (this.service && type && type !== this.service) {
+          localStorage.clear();
+          obj = this.sync_object[type];
+          obj.service = type;
+          this.setup(obj);
+        }
+        return this._authorize(type);
+      };
+    },
+    clear_storage: function() {
+      log('Will clear localStorage or indexedDB');
+      localStorage.clear();
+      PouchDB.destroy(this.app_name);
+    },
+    authorized: function() {
+      return log("authorized not yet setup");
+    },
+    state: function() {
+      return localStorage["state"];
+    },
+    authorize: function() {
+      return log("authorize not yet setup");
+    },
+    initialize: function() {
+      return log("initialize not setup");
+    },
+    authorized_callback: function() {
+      return log("authorized callback undefined");
+    },
+    app_ready_func: function() {
+      log("app_ready");
+      return this.app_ready = true;
+    },
+    set_app_ready: function(callback) {
+      var cb;
+      log("set app ready");
+      if ((this.app_ready != null) && this.app_ready) {
+        if (this.service === 'GDrive') {
+          return Nimbus.realtime.folder_initialize(callback);
+        } else {
+          return callback();
+        }
+      } else {
+        cb = function() {
+          if (this.service === 'GDrive') {
+            return Nimbus.realtime.folder_initialize(callback);
+          } else {
+            return callback();
+          }
+        };
+        return this.app_ready_func = cb;
+      }
+    },
+    logout: function() {
+      return log("logout not implemented");
+    }
+  });
+
+  Client = Nimbus.Client = Class.create();
+
+  Share = Nimbus.Share = Class.create();
+
+  Share.extend({
+    setup: function(sync_service) {
+      switch (sync_service) {
+        case "GDrive":
+          log("share api with GDrive");
+          this.extend(Nimbus.Client.GDrive);
+          this.get_users = this.proxy(this.get_shared_users);
+          this.add_user = this.proxy(this.add_share_user);
+          this.remove_user = this.proxy(this.remove_share_user);
+          this.get_me = this.proxy(this.get_current_user);
+          this.get_spaces = this.proxy(this.get_app_folders);
+          this.switch_spaces = this.proxy(this.switch_to_app_folder);
+          return this.switch_file_real = this.proxy(this.switch_to_app_file_real);
+        default:
+          return log("share not supported with this service");
+      }
+    },
+    get_users: function() {
+      return log("users not implemented");
+    },
+    add_user: function(email) {
+      return log("add a user");
+    },
+    remove_user: function(id) {
+      return log("removed user");
+    },
+    get_me: function() {
+      return log("get currently logged user");
+    },
+    get_spaces: function() {
+      return log("get current spaces");
+    },
+    switch_spaces: function(id) {
+      return log("switch space");
+    }
+  });
+
+  Binary = Nimbus.Binary = Class.create();
+
+  Binary.extend({
+    setup: function(sync_service) {
+      log("binary setup called");
+      switch (sync_service) {
+        case "Dropbox":
+          this.extend(Nimbus.Client.Dropbox.Binary);
+          Nimbus.Client.Dropbox.Binary.binary_setup();
+          return log("service is dropbox");
+        case "GDrive":
+          this.extend(Nimbus.Client.GDrive.Binary);
+          Nimbus.Client.GDrive.Binary.binary_setup();
+          return log("service is GDrive");
+        case "Realtime":
+          return log("service is  Realtime");
+        default:
+          return log("Invalid service name");
+      }
+    },
+    upload_blob: function(blob, name, callback) {
+      return log("upload blob");
+    },
+    upload_file: function(file, callback) {
+      return log("upload blob");
+    },
+    read_file: function(binary, callback) {
+      return log("read file");
+    },
+    share_link: function(binary, callback) {
+      return log("share link");
+    },
+    direct_link: function(binary, callback) {
+      return log("direct link");
+    },
+    delete_file: function(binary) {
+      return log("delete file");
+    }
+  });
+
+  DB = Nimbus.DB = Class.create();
+
+  DB.extend(Events);
+
+  DB.extend({
+    setup_db: function(type) {
+      log("setup db");
+      switch (type) {
+        case "localStorage":
+          return Storage.prototype.setItem = function(key, value) {
+            if (this === window.localStorage) {
+              return log("local storage called");
+            } else {
+              return _setItem.apply(this, arguments);
+            }
+          };
+      }
+    }
+  });
+
+  Model = Nimbus.Model = Class.create();
+
+  Model.extend(Events);
+
+  Model.extend({
+    loaded: false,
+    check_loaded: function() {
+      if (this.loaded) {
+        return true;
+      } else {
+        console.log("The model is not loaded yet! Wait for the model to be done with setup.");
+        return false;
+      }
+    },
+    service_setup: function(model) {
+      var atts;
+      log("service setup model", model);
+      atts = model.attributes;
+      switch (Nimbus.Auth.service) {
+        case "Dropbox":
+          log("extend as Dropbox");
+          model.extend(Nimbus.Model.general_sync);
+          model.extend(Nimbus.Model.Dropbox);
+          atts.push("synced");
+          atts.push("time");
           model.attributes = atts;
+          break;
+        case "GDrive":
+          log("extend as GDrive");
+          model.extend(Nimbus.Model.general_sync);
+          model.extend(Nimbus.Model.Realtime);
+          atts.push("gid");
+          atts.push("synced");
+          atts.push("time");
+          atts.push("type");
+          model.attributes = atts;
+          break;
+        default:
+          log("Invalid service name");
+      }
+      return model;
+    },
+    setup: function(name, atts, callback) {
+      var Deletion, model;
+      log("model setup");
+      model = Model.sub();
+      if (name) {
+        model.name = name;
+      }
+      if (atts) {
+        model.attributes = atts;
+      }
+      if ((Nimbus.Auth.sync_services.synchronous != null) && Nimbus.Auth.sync_services.synchronous) {
+        model.extend(Nimbus.Model.LocalSync);
+      } else {
+        model.extend(Nimbus.Model.Local);
+      }
+      Nimbus.dictModel[name] = model;
+      if ((Nimbus.Auth.service != null) || (Nimbus.Auth.sync_services != null) || name === "binary" || name === "binary_Deletion") {
+        log("model 1", model);
+        if (name.indexOf("_Deletion") < 0) {
+          model = this.service_setup(model);
         }
-        if ((Nimbus.Auth.sync_services.synchronous != null) && Nimbus.Auth.sync_services.synchronous) {
-          model.extend(Nimbus.Model.LocalSync);
-        } else {
-          model.extend(Nimbus.Model.Local);
-        }
+      } else {
+        log("name:", name);
+        log("Please setup Nimbus.Auth first before creating models");
+      }
+      if (name.indexOf("_Deletion") < 0) {
+        Deletion = Nimbus.Model.setup(name + "_" + "Deletion", ["deletion_id", "listid"]);
+        Deletion.extend(Nimbus.Model.Local);
+        Deletion.fetch();
+        model.DeletionStorage = Deletion;
+      }
+      log(model);
+      model.fetch();
+      if (name.indexOf("_Deletion") < 0) {
         Nimbus.dictModel[name] = model;
-        if ((Nimbus.Auth.service != null) || (Nimbus.Auth.sync_services != null) || name === "binary" || name === "binary_Deletion") {
-          log("model 1", model);
-          if (name.indexOf("_Deletion") < 0) {
-            model = this.service_setup(model);
-          }
-        } else {
-          log("name:", name);
-          log("Please setup Nimbus.Auth first before creating models");
-        }
-        if (name.indexOf("_Deletion") < 0) {
-          Deletion = Nimbus.Model.setup(name + "_" + "Deletion", ["deletion_id", "listid"]);
-          Deletion.extend(Nimbus.Model.Local);
-          Deletion.fetch();
-          model.DeletionStorage = Deletion;
-        }
-        log(model);
-        model.fetch();
-        if (name.indexOf("_Deletion") < 0) {
-          Nimbus.dictModel[name] = model;
-        } else {
-          delete Nimbus.dictModel[name];
-        }
-        return model;
-      },
-      created: function(sub) {
-        this.records = {};
-        return this.attributes = (this.attributes ? makeArray(this.attributes) : []);
-      },
-      find: function(id) {
-        var record;
-        record = this.records[id];
-        if (!record) {
-          throw "Unknown record";
-        }
-        return record.clone();
-      },
-      exists: function(id) {
-        var e;
-        try {
-          return this.find(id);
-        } catch (_error) {
-          e = _error;
-          return false;
-        }
-      },
-      refresh: function(values) {
-        var i, il, record;
-        values = this.fromJSON(values);
-        this.records = {};
-        i = 0;
-        il = values.length;
-        while (i < il) {
-          record = values[i];
-          record.newRecord = false;
-          this.records[record.id] = record;
-          i++;
-        }
-        this.trigger("refresh");
-        return this;
-      },
-      select: function(callback) {
-        var key, result;
-        result = [];
-        for (key in this.records) {
-          if (callback(this.records[key])) {
-            result.push(this.records[key]);
-          }
-        }
-        return this.cloneArray(result);
-      },
-      findByAttribute: function(name, value) {
-        var key;
-        for (key in this.records) {
-          if (this.records[key][name] === value) {
-            return this.records[key].clone();
-          }
-        }
-      },
-      findAllByAttribute: function(name, value) {
-        return this.select(function(item) {
-          return item[name] === value;
-        });
-      },
-      each: function(callback) {
-        var key, _results;
-        _results = [];
-        for (key in this.records) {
-          _results.push(callback(this.records[key]));
-        }
-        return _results;
-      },
-      all: function() {
-        return this.cloneArray(this.recordsValues());
-      },
-      first: function() {
-        var record;
-        record = this.recordsValues()[0];
-        return record && record.clone();
-      },
-      last: function() {
-        var record, values;
-        values = this.recordsValues();
-        record = values[values.length - 1];
-        return record && record.clone();
-      },
-      count: function() {
-        return this.recordsValues().length;
-      },
-      deleteAll: function() {
-        var key, _results;
-        _results = [];
-        for (key in this.records) {
-          _results.push(delete this.records[key]);
-        }
-        return _results;
-      },
-      destroyAll: function() {
-        var key, _results;
-        _results = [];
-        for (key in this.records) {
-          _results.push(this.records[key].destroy());
-        }
-        return _results;
-      },
-      update: function(id, atts) {
-        return this.find(id).updateAttributes(atts);
-      },
-      create: function(atts) {
-        var record;
-        record = this.init(atts);
-        return record.save();
-      },
-      destroy: function(id) {
-        return this.find(id).destroy();
-      },
-      sync: function(callback) {
-        return this.bind("change", callback);
-      },
-      fetch: function(callbackOrParams) {
-        if (!this.loaded && (callbackOrParams != null)) {
-          this.loadLocal(callbackOrParams);
-        }
-        if (typeof callbackOrParams === "function") {
-          return this.bind("fetch", callbackOrParams);
-        } else {
-          return this.trigger.apply(this, ["fetch"].concat(makeArray(arguments)));
-        }
-      },
-      toJSON: function() {
-        return this.recordsValues();
-      },
-      fromJSON: function(objects) {
-        var i, results;
-        if (!objects) {
-          return;
-        }
-        if (typeof objects === "string") {
-          objects = JSON.parse(objects);
-        }
-        if (isArray(objects)) {
-          results = [];
-          i = 0;
-          while (i < objects.length) {
-            results.push(this.init(objects[i]));
-            i++;
-          }
-          return results;
-        } else {
-          return this.init(objects);
-        }
-      },
-      recordsValues: function() {
-        var key, result;
-        result = [];
-        for (key in this.records) {
+      } else {
+        delete Nimbus.dictModel[name];
+      }
+      return model;
+    },
+    created: function(sub) {
+      this.records = {};
+      return this.attributes = (this.attributes ? makeArray(this.attributes) : []);
+    },
+    find: function(id) {
+      var record;
+      record = this.records[id];
+      if (!record) {
+        throw "Unknown record";
+      }
+      return record.clone();
+    },
+    exists: function(id) {
+      var e;
+      try {
+        return this.find(id);
+      } catch (_error) {
+        e = _error;
+        return false;
+      }
+    },
+    refresh: function(values) {
+      var i, il, record;
+      values = this.fromJSON(values);
+      this.records = {};
+      i = 0;
+      il = values.length;
+      while (i < il) {
+        record = values[i];
+        record.newRecord = false;
+        this.records[record.id] = record;
+        i++;
+      }
+      this.trigger("refresh");
+      return this;
+    },
+    select: function(callback) {
+      var key, result;
+      result = [];
+      for (key in this.records) {
+        if (callback(this.records[key])) {
           result.push(this.records[key]);
         }
-        return result;
-      },
-      cloneArray: function(array) {
-        var i, result;
-        result = [];
-        i = 0;
-        while (i < array.length) {
-          result.push(array[i].clone());
-          i++;
-        }
-        return result;
       }
-    });
-    return Model.include({
-      model: true,
-      newRecord: true,
-      init: function(atts) {
-        var parent_type;
-        if (atts) {
-          this.load(atts);
+      return this.cloneArray(result);
+    },
+    findByAttribute: function(name, value) {
+      var key;
+      for (key in this.records) {
+        if (this.records[key][name] === value) {
+          return this.records[key].clone();
         }
-        parent_type = this.parent.name;
-        this.parent = function() {
-          return Nimbus.dictModel[parent_type];
-        };
-        return this.trigger("init", this);
-      },
-      isNew: function() {
-        return this.newRecord;
-      },
-      isValid: function() {
-        return !this.validate();
-      },
-      validate: function() {},
-      load: function(atts) {
-        var name, _results;
-        _results = [];
-        for (name in atts) {
-          _results.push(this[name] = atts[name]);
-        }
-        return _results;
-      },
-      attributes: function() {
-        var attr, i, result;
-        result = {};
+      }
+    },
+    findAllByAttribute: function(name, value) {
+      return this.select(function(item) {
+        return item[name] === value;
+      });
+    },
+    each: function(callback) {
+      var key, _results;
+      _results = [];
+      for (key in this.records) {
+        _results.push(callback(this.records[key]));
+      }
+      return _results;
+    },
+    all: function() {
+      return this.cloneArray(this.recordsValues());
+    },
+    first: function() {
+      var record;
+      record = this.recordsValues()[0];
+      return record && record.clone();
+    },
+    last: function() {
+      var record, values;
+      values = this.recordsValues();
+      record = values[values.length - 1];
+      return record && record.clone();
+    },
+    count: function() {
+      return this.recordsValues().length;
+    },
+    deleteAll: function() {
+      var key, _results;
+      _results = [];
+      for (key in this.records) {
+        _results.push(delete this.records[key]);
+      }
+      return _results;
+    },
+    destroyAll: function() {
+      var key, _results;
+      _results = [];
+      for (key in this.records) {
+        _results.push(this.records[key].destroy());
+      }
+      return _results;
+    },
+    update: function(id, atts) {
+      return this.find(id).updateAttributes(atts);
+    },
+    create: function(atts) {
+      var record;
+      record = this.init(atts);
+      return record.save();
+    },
+    destroy: function(id) {
+      return this.find(id).destroy();
+    },
+    sync: function(callback) {
+      return this.bind("change", callback);
+    },
+    fetch: function(callbackOrParams) {
+      if (!this.loaded && (callbackOrParams != null)) {
+        this.loadLocal(callbackOrParams);
+      }
+      if (typeof callbackOrParams === "function") {
+        return this.bind("fetch", callbackOrParams);
+      } else {
+        return this.trigger.apply(this, ["fetch"].concat(makeArray(arguments)));
+      }
+    },
+    toJSON: function() {
+      return this.recordsValues();
+    },
+    fromJSON: function(objects) {
+      var i, results;
+      if (!objects) {
+        return;
+      }
+      if (typeof objects === "string") {
+        objects = JSON.parse(objects);
+      }
+      if (isArray(objects)) {
+        results = [];
         i = 0;
-        while (i < this.parent().attributes.length) {
-          attr = this.parent().attributes[i];
-          result[attr] = this[attr];
+        while (i < objects.length) {
+          results.push(this.init(objects[i]));
           i++;
         }
-        result.id = this.id;
-        return result;
-      },
-      eql: function(rec) {
-        return rec && rec.id === this.id && rec.parent() === this.parent();
-      },
-      save: function() {
-        var error;
-        error = this.validate();
-        if (error) {
-          this.trigger("error", this, error);
-          return false;
-        }
-        this.trigger("beforeSave", this);
-        if (this.newRecord) {
-          this.create();
-        } else {
-          this.update();
-        }
-        this.trigger("save", this);
-        return this;
-      },
-      updateAttribute: function(name, value) {
-        this[name] = value;
-        return this.save();
-      },
-      updateAttributes: function(atts) {
+        return results;
+      } else {
+        return this.init(objects);
+      }
+    },
+    recordsValues: function() {
+      var key, result;
+      result = [];
+      for (key in this.records) {
+        result.push(this.records[key]);
+      }
+      return result;
+    },
+    cloneArray: function(array) {
+      var i, result;
+      result = [];
+      i = 0;
+      while (i < array.length) {
+        result.push(array[i].clone());
+        i++;
+      }
+      return result;
+    }
+  });
+
+  Model.include({
+    model: true,
+    newRecord: true,
+    init: function(atts) {
+      var parent_type;
+      if (atts) {
         this.load(atts);
-        return this.save();
-      },
-      destroy: function() {
-        this.trigger("beforeDestroy", this);
-        delete this.parent().records[this.id];
-        this.destroyed = true;
-        this.trigger("destroy", this);
-        return this.trigger("change", this, "destroy");
-      },
-      dup: function() {
-        var result;
-        result = this.parent().init(this.attributes());
-        result.newRecord = this.newRecord;
-        return result;
-      },
-      clone: function() {
-        return Object.create(this);
-      },
-      reload: function() {
-        var original;
-        if (this.newRecord) {
-          return this;
-        }
-        original = this.parent().find(this.id);
-        this.load(original.attributes());
-        return original;
-      },
-      toJSON: function() {
-        return this.attributes();
-      },
-      exists: function() {
-        return this.id && this.id in this.parent().records;
-      },
-      update: function() {
-        var clone, records;
-        this.trigger("beforeUpdate", this);
-        records = this.parent().records;
-        records[this.id].load(this.attributes());
-        clone = records[this.id].clone();
-        this.trigger("update", clone);
-        return this.trigger("change", clone, "update");
-      },
-      create: function() {
-        var clone, records;
-        this.trigger("beforeCreate", this);
-        if (!this.id) {
-          this.id = Nimbus.guid();
-        }
-        this.newRecord = false;
-        records = this.parent().records;
-        records[this.id] = this.dup();
-        clone = records[this.id].clone();
-        this.trigger("create", clone);
-        return this.trigger("change", clone, "create");
-      },
-      bind: function(events, callback) {
-        return this.parent().bind(events, this.proxy(function(record) {
-          if (record && this.eql(record)) {
-            return callback.apply(this, arguments);
-          }
-        }));
-      },
-      trigger: function() {
-        var e;
-        try {
-          return this.parent().trigger.apply(this.parent(), arguments);
-        } catch (_error) {
-          e = _error;
-          return log(e);
-        }
       }
-    });
-  })();
+      parent_type = this.parent.name;
+      this.parent = function() {
+        return Nimbus.dictModel[parent_type];
+      };
+      return this.trigger("init", this);
+    },
+    isNew: function() {
+      return this.newRecord;
+    },
+    isValid: function() {
+      return !this.validate();
+    },
+    validate: function() {},
+    load: function(atts) {
+      var name, _results;
+      _results = [];
+      for (name in atts) {
+        _results.push(this[name] = atts[name]);
+      }
+      return _results;
+    },
+    attributes: function() {
+      var attr, i, result;
+      result = {};
+      i = 0;
+      while (i < this.parent().attributes.length) {
+        attr = this.parent().attributes[i];
+        result[attr] = this[attr];
+        i++;
+      }
+      result.id = this.id;
+      return result;
+    },
+    eql: function(rec) {
+      return rec && rec.id === this.id && rec.parent() === this.parent();
+    },
+    save: function() {
+      var error;
+      error = this.validate();
+      if (error) {
+        this.trigger("error", this, error);
+        return false;
+      }
+      this.trigger("beforeSave", this);
+      if (this.newRecord) {
+        this.create();
+      } else {
+        this.update();
+      }
+      this.trigger("save", this);
+      return this;
+    },
+    updateAttribute: function(name, value) {
+      this[name] = value;
+      return this.save();
+    },
+    updateAttributes: function(atts) {
+      this.load(atts);
+      return this.save();
+    },
+    destroy: function() {
+      this.trigger("beforeDestroy", this);
+      delete this.parent().records[this.id];
+      this.destroyed = true;
+      this.trigger("destroy", this);
+      return this.trigger("change", this, "destroy");
+    },
+    dup: function() {
+      var result;
+      result = this.parent().init(this.attributes());
+      result.newRecord = this.newRecord;
+      return result;
+    },
+    clone: function() {
+      return Object.create(this);
+    },
+    reload: function() {
+      var original;
+      if (this.newRecord) {
+        return this;
+      }
+      original = this.parent().find(this.id);
+      this.load(original.attributes());
+      return original;
+    },
+    toJSON: function() {
+      return this.attributes();
+    },
+    exists: function() {
+      return this.id && this.id in this.parent().records;
+    },
+    update: function() {
+      var clone, records;
+      this.trigger("beforeUpdate", this);
+      records = this.parent().records;
+      records[this.id].load(this.attributes());
+      clone = records[this.id].clone();
+      this.trigger("update", clone);
+      return this.trigger("change", clone, "update");
+    },
+    create: function() {
+      var clone, records;
+      this.trigger("beforeCreate", this);
+      if (!this.id) {
+        this.id = Nimbus.guid();
+      }
+      this.newRecord = false;
+      records = this.parent().records;
+      records[this.id] = this.dup();
+      clone = records[this.id].clone();
+      this.trigger("create", clone);
+      return this.trigger("change", clone, "create");
+    },
+    bind: function(events, callback) {
+      return this.parent().bind(events, this.proxy(function(record) {
+        if (record && this.eql(record)) {
+          return callback.apply(this, arguments);
+        }
+      }));
+    },
+    trigger: function() {
+      var e;
+      try {
+        return this.parent().trigger.apply(this.parent(), arguments);
+      } catch (_error) {
+        e = _error;
+        return log(e);
+      }
+    }
+  });
 
   Set = (function() {
     function Set(set) {
@@ -25657,24 +25692,24 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
       object.save();
       window.currently_syncing = false;
       content = this.toCloudStructure(object);
-      return window.todo.set(object.id, content);
+      return Nimbus.realtime.todo.set(object.id, content);
     },
     delete_from_cloud: function(object_id, callback) {
-      log("delete from cloud", object_id, window.todo.has(object_id));
-      if (window.todo.has(object_id)) {
-        return window.todo["delete"](object_id);
+      log("delete from cloud", object_id, Nimbus.realtime.todo.has(object_id));
+      if (Nimbus.realtime.todo.has(object_id)) {
+        return Nimbus.realtime.todo["delete"](object_id);
       }
     },
     update_to_cloud: function(object, callback) {
       var content;
       log("updated to cloud", object.id);
       content = this.toCloudStructure(object);
-      return window.todo.set(object.id, content);
+      return Nimbus.realtime.todo.set(object.id, content);
     },
     add_from_cloud: function(object_id, callback) {
       var converted, data, x;
       log("add from cloud GDrive", object_id);
-      data = window.todo.get(object_id);
+      data = Nimbus.realtime.todo.get(object_id);
       window.currently_syncing = true;
       converted = this.fromCloudStructure(data);
       x = this.init(converted);
@@ -25685,7 +25720,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
     update_to_local: function(object, callback) {
       var converted, data, x;
       log("update to local", object);
-      data = window.todo.get(object.id);
+      data = Nimbus.realtime.todo.get(object.id);
       window.currently_syncing = true;
       converted = this.fromCloudStructure(data);
       x = this.init(converted);
@@ -25717,11 +25752,11 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
       var content, x, _i, _len, _ref, _results;
       log("loads all the data from the cloud locally");
       this.cloudcache = {};
-      _ref = window.todo.keys();
+      _ref = Nimbus.realtime.todo.keys();
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         x = _ref[_i];
-        content = this.fromCloudStructure(window.todo.get(x));
+        content = this.fromCloudStructure(Nimbus.realtime.todo.get(x));
         if (content.type === this.name) {
           _results.push(this.cloudcache[x] = content);
         } else {
@@ -25760,17 +25795,17 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
 
   /* initialization and model linking code */
 
-  window.initializeModel = function(model) {
+  Nimbus.realtime.initializeModel = function(model) {
     var field;
     log("model initialization", model);
     field = model.createMap({});
     return model.getRoot().set("todo", field);
   };
 
-  window.onFileLoaded = function(doc) {
+  Nimbus.realtime.onFileLoaded = function(doc) {
     var process_event, todo;
     log("file loaded", doc);
-    window.doc = doc;
+    Nimbus.realtime.doc = doc;
     process_event = function(event) {
       var a, current_event, model, obj;
       log("PROCESS EVENT");
@@ -25782,8 +25817,6 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
       if (event.newValue != null) {
         obj = JSON.parse(event.newValue);
       }
-      log("object", obj);
-      window.obj = obj;
       model = Nimbus.dictModel[obj.type];
       if (event.oldValue === null) {
         log("add event");
@@ -25806,26 +25839,26 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
       model.process_callback_chain(current_event, obj, event.isLocal);
       log("EVENT: ", current_event, " OBJ: ", obj);
       if (window.realtime_update_handler != null) {
-        return window.realtime_update_handler(current_event, obj, event.isLocal);
+        return Nimbus.realtime.realtime_update_handler(current_event, obj, event.isLocal);
       }
     };
     todo = doc.getModel().getRoot().get("todo");
-    window.todo = todo;
-    if (window.real_time_callback != null) {
-      window.real_time_callback();
+    Nimbus.realtime.todo = todo;
+    if (Nimbus.realtime.real_time_callback != null) {
+      Nimbus.realtime.real_time_callback();
     }
     return todo.addEventListener(gapi.drive.realtime.EventType.VALUE_CHANGED, process_event);
   };
 
-  window.create_share_client = function() {
+  Nimbus.realtime.create_share_client = function() {
     var share_client;
     share_client = new gapi.drive.share.ShareClient(Nimbus.Auth.app_id);
-    share_client.setItemIds(c_file.id);
+    share_client.setItemIds(Nimbus.realtime.c_file.id);
     share_client.showSettingsDialog();
-    return window.share_client = share_client;
+    return Nimbus.realtime.share_client = share_client;
   };
 
-  window.handleErrors = handleErrors = function(e) {
+  Nimbus.realtime.handleErrors = handleErrors = function(e) {
     if (e.type === gapi.drive.realtime.ErrorType.TOKEN_REFRESH_REQUIRED) {
       return gapi.auth.authorize({
         client_id: Nimbus.Auth.key,
@@ -25842,7 +25875,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
     }
   };
 
-  window.startRealtime = function(callback) {
+  Nimbus.realtime.startRealtime = function(callback) {
     var action_for_realtime, current_user_account;
     current_user_account = Nimbus.Share.get_user_email();
     if (!localStorage.current_user_account || localStorage.current_user_account !== current_user_account) {
@@ -25850,13 +25883,13 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
     }
     localStorage.current_user_account = current_user_account;
     if (callback != null) {
-      window.real_time_callback = callback;
+      Nimbus.realtime.real_time_callback = callback;
     }
     action_for_realtime = function() {
       return Nimbus.Client.GDrive.getMetadataList("mimeType = 'application/vnd.google-apps.drive-sdk." + Nimbus.Auth.app_id + "'", function(data) {
         var c_file, i, index, workspace, x, _ref;
         console.log("drive apps", data);
-        window.app_files = data.items;
+        Nimbus.realtime.app_files = data.items;
         i = [];
         workspace = 0;
         _ref = data.items;
@@ -25877,15 +25910,15 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
             delete localStorage.last_opened_workspace;
           }
           c_file = i[workspace];
-          window.c_file = c_file;
-          return gapi.drive.realtime.load(c_file.id, onFileLoaded, initializeModel, handleErrors);
+          Nimbus.realtime.c_file = c_file;
+          return gapi.drive.realtime.load(c_file.id, Nimbus.realtime.onFileLoaded, Nimbus.realtime.initializeModel, Nimbus.realtime.handleErrors);
         } else {
           log("file not there");
           Nimbus.Client.GDrive.insertFile("", Nimbus.Auth.app_name, 'application/vnd.google-apps.drive-sdk', null, function(data) {
             log("finished insertFile", data);
-            window.c_file = data;
-            window.app_files.push(data);
-            return gapi.drive.realtime.load(data.id, onFileLoaded, initializeModel, handleErrors);
+            Nimbus.realtime.c_file = data;
+            Nimbus.realtime.app_files.push(data);
+            return gapi.drive.realtime.load(data.id, Nimbus.realtime.onFileLoaded, Nimbus.realtime.initializeModel, Nimbus.realtime.handleErrors);
           });
           return log("need to create file for app");
         }
@@ -25898,12 +25931,12 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
     }
   };
 
-  window.load_new_file = function(file_id, callback, exception_handle) {
+  Nimbus.realtime.load_new_file = function(file_id, callback, exception_handle) {
     if (callback != null) {
-      window.real_time_callback = callback;
+      Nimbus.realtime.real_time_callback = callback;
     }
     return Nimbus.Share.getFile(file_id, function(data) {
-      window.c_file = data;
+      Nimbus.realtime.c_file = data;
       if (!data.id) {
         return;
       }
@@ -26317,7 +26350,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
       var token;
       log("checking if this is authenticated");
       if (location.protocol === "chrome-extension:") {
-        if ((typeof gapi !== "undefined" && gapi !== null) && (gapi.auth != null) && gapi.auth.getToken() === null && (window.todo != null)) {
+        if ((typeof gapi !== "undefined" && gapi !== null) && (gapi.auth != null) && gapi.auth.getToken() === null && (Nimbus.realtime.todo != null)) {
           token = Nimbus.Auth.GDrive.getLocalOauth2Token();
           if ((token == null) || Nimbus.Auth.GDrive.isTokenExpires(token)) {
             return false;
@@ -26327,7 +26360,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
           }
         }
       }
-      return (typeof gapi !== "undefined" && gapi !== null) && (gapi.auth != null) && gapi.auth.getToken() !== null && Object.keys(gapi.auth.getToken()).length !== 0 && (window.todo != null);
+      return (typeof gapi !== "undefined" && gapi !== null) && (gapi.auth != null) && gapi.auth.getToken() !== null && Object.keys(gapi.auth.getToken()).length !== 0 && (Nimbus.realtime.todo != null);
     },
     authorize: function(client_id, scopes, callback) {
       log("authorized called");
@@ -26582,7 +26615,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
           }
         };
       })(this);
-      app_folder_id = window.folder['binary_files'].id;
+      app_folder_id = Nimbus.realtime.folder['binary_files'].id;
       params = {
         path: "/drive/v2/files/" + app_folder_id + "/permissions",
         method: "POST",
@@ -26600,7 +26633,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
     add_share_user_real: function(email, callback, file_id) {
       var fid, params, process;
       log("&&& add share user");
-      fid = file_id ? file_id : window.c_file.id;
+      fid = file_id ? file_id : Nimbus.realtime.c_file.id;
       process = (function(_this) {
         return function(person) {
           var p;
@@ -26636,7 +26669,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
     remove_share_user: function(id, callback) {
       var app_folder_id, params;
       log("&&& remove a user from sharing this app");
-      app_folder_id = window.folder['binary_files'].id;
+      app_folder_id = Nimbus.realtime.folder['binary_files'].id;
       if (!callback) {
         callback = function(file) {
           return log("Permission Removal Complete ", file);
@@ -26656,7 +26689,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
           return log("Permission Removal Complete ", file);
         };
       }
-      file_id = file_id ? file_id : window.c_file.id;
+      file_id = file_id ? file_id : Nimbus.realtime.c_file.id;
       params = {
         path: "/drive/v2/files/" + file_id + "/permissions/" + id,
         method: "DELETE"
@@ -26717,7 +26750,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
         };
       })(this);
       params = {
-        path: "/drive/v2/files/" + window.c_file.id + "/permissions",
+        path: "/drive/v2/files/" + Nimbus.realtime.c_file.id + "/permissions",
         method: "GET"
       };
       return this.make_request(params, process);
@@ -26725,7 +26758,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
     get_shared_users: function(callback) {
       var app_folder_id, params, process;
       log("&&& get shared users");
-      app_folder_id = window.folder['binary_files'].id;
+      app_folder_id = Nimbus.realtime.folder['binary_files'].id;
       process = (function(_this) {
         return function(file) {
           var p, perm, permissions, _i, _len, _ref;
@@ -26780,8 +26813,8 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
     },
     switch_to_app_folder: function(id, callback) {
       log("###switch to app folder");
-      window.folder = {};
-      window.folder[Nimbus.Auth.app_name] = {
+      Nimbus.realtime.folder = {};
+      Nimbus.realtime.folder[Nimbus.Auth.app_name] = {
         "title": Nimbus.Auth.app_name,
         "id": id
       };
@@ -26801,7 +26834,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
           x = a[_i];
           log(x);
           if (x.parents.length > 0 && (x.parents[0].id === id)) {
-            window.folder[x.title] = x;
+            Nimbus.realtime.folder[x.title] = x;
           }
         }
         if (Nimbus.dictModel != null) {
@@ -26848,7 +26881,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
         if (!data.id) {
           return;
         }
-        window.c_file = data;
+        Nimbus.realtime.c_file = data;
         if (Nimbus.dictModel != null) {
           _ref = Nimbus.dictModel;
           for (k in _ref) {
@@ -26859,7 +26892,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
             }
           }
         }
-        return gapi.drive.realtime.load(id, onFileLoaded, initializeModel, handleErrors);
+        return gapi.drive.realtime.load(id, Nimbus.realtime.onFileLoaded, Nimbus.realtime.initializeModel, Nimbus.realtime.handleErrors);
       });
       return window.current_syncing.ready();
     },
@@ -26980,7 +27013,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
           var come_back, content, contentType, new_file, parent;
           content = reader.result;
           contentType = blob.type || 'application/octet-stream';
-          parent = window.folder["binary_files"].id;
+          parent = Nimbus.realtime.folder["binary_files"].id;
           new_file = binary.create({
             'name': name
           });
@@ -27010,7 +27043,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
           name = file.name;
           content = reader.result;
           contentType = file.type || 'application/octet-stream';
-          parent = window.folder["binary_files"].id;
+          parent = Nimbus.realtime.folder["binary_files"].id;
           new_file = binary.create({
             'name': name
           });
@@ -27103,7 +27136,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
       var parent, parent_name;
       log("add to cloud", object);
       parent_name = object.parent.name;
-      parent = window.folder[parent_name].id;
+      parent = Nimbus.realtime.folder[parent_name].id;
       return Nimbus.Client.GDrive.insertFile(this.toCloudStructure(object), object.id, "text/plain", parent, function(data) {
         log("logging data inserted", data);
         window.currently_syncing = true;
@@ -27134,7 +27167,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
       var comeback, parent, parent_name, update_comback;
       log("updated to cloud", object.name);
       parent_name = object.parent.name;
-      parent = window.folder[parent_name].id;
+      parent = Nimbus.realtime.folder[parent_name].id;
       update_comback = (function(_this) {
         return function(data) {
           log("logging data inserted", data);
@@ -27189,9 +27222,8 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
       return Nimbus.Client.GDrive.getMetadataList("title = '" + object_id + "'", function(data) {
         var url;
         log("cloud read data", data);
-        window.data = data;
         if ((data.items != null) && data.items.length >= 1) {
-          url = window.data.items[0].downloadUrl;
+          url = data.items[0].downloadUrl;
           return Nimbus.Client.GDrive.readFile(url, process_data);
         } else {
           return log("This data is not there");
@@ -27216,7 +27248,6 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
       return Nimbus.Client.GDrive.getMetadataList("title = '" + object.id + "'", function(data) {
         var url;
         log("cloud read data", data);
-        window.data = data;
         if (data.error != null) {
           window.nimbus_error.push({
             error: data.error,
@@ -27225,7 +27256,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
           return console.log("##ERROR writing back to local", data.error, "object: ", object);
         } else {
           if (data.items.length >= 1) {
-            url = window.data.items[0].downloadUrl;
+            url = data.items[0].downloadUrl;
             return Nimbus.Client.GDrive.readFile(url, process_data);
           } else {
             return log("This data is not there");
@@ -27257,13 +27288,12 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
       this.cloudcache = {};
       object_name = this.name;
       log("object name", object_name);
-      if ((window.folder != null) && (window.folder[object_name] != null)) {
-        folder_id = window.folder[object_name].id;
+      if ((Nimbus.realtime.folder != null) && (Nimbus.realtime.folder[object_name] != null)) {
+        folder_id = Nimbus.realtime.folder[object_name].id;
         fill_cache = (function(_this) {
           return function(data) {
             var x, _i, _len, _ref, _results;
             log("cloud read data", object_name, data);
-            window.data = data;
             if (data.items != null) {
               _ref = data.items;
               _results = [];
@@ -27301,18 +27331,19 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
     }
   };
 
-  window.folder = null;
+  Nimbus.realtime.folder = null;
 
-  window.folder_creation = new OneOp();
+  Nimbus.realtime.folder_creation = new OneOp();
 
-  window.creating = {};
+  Nimbus.realtime.creating = {};
 
-  window.handle_initialization = new OneOp();
+  Nimbus.realtime.handle_initialization = new OneOp();
 
-  window.gdrive_initialized = false;
+  Nimbus.realtime.gdrive_initialized = false;
 
-  window.folder_initialize = function(callback) {
-    var get_app_folder, properties, query, space_folder_name;
+  Nimbus.realtime.folder_initialize = function(callback) {
+    var c_file, get_app_folder, properties, query, space_folder_name;
+    c_file = Nimbus.realtime.c_file;
     space_folder_name = c_file.title + ' files';
     query = "mimeType = 'application/vnd.google-apps.folder' and title = '" + space_folder_name + "' and properties has { key='space' and value='" + c_file.id + "' and visibility='PRIVATE' }";
     properties = [
@@ -27336,10 +27367,10 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
       return Nimbus.Client.GDrive.getMetadataList(query, function(data) {
         var a, x, _i, _len;
         log("#data: ", data);
-        window.folder = {};
+        Nimbus.realtime.folder = {};
         a = data.items;
         if (localStorage["main_folder_id"] != null) {
-          return window.folder[Nimbus.Auth.app_name] = {
+          return Nimbus.realtime.folder[Nimbus.Auth.app_name] = {
             "title": Nimbus.Auth.app_name,
             "id": localStorage["main_folder_id"]
           };
@@ -27347,17 +27378,17 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
           for (_i = 0, _len = a.length; _i < _len; _i++) {
             x = a[_i];
             if (x.owners[0].permissionId === c_file.owners[0].permissionId) {
-              window.folder.binary_files = x;
+              Nimbus.realtime.folder.binary_files = x;
               break;
             }
           }
-          if (window.folder["binary_files"] == null) {
+          if (Nimbus.realtime.folder["binary_files"] == null) {
             return Nimbus.Client.GDrive.insertFile("", c_file.title + ' files', "application/vnd.google-apps.folder", null, function(data) {
               log("binary_files folder data", data);
               log("binary ready callback", binary_ready_callback);
-              window.folder['binary_files'] = data;
-              if (window.binary_ready_callback) {
-                window.binary_ready_callback();
+              Nimbus.realtime.folder['binary_files'] = data;
+              if (Nimbus.realtime.binary_ready_callback) {
+                Nimbus.realtime.binary_ready_callback();
               }
               if (callback != null) {
                 return callback();
@@ -27365,8 +27396,8 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
             }, properties);
           } else {
             log("binary ready callback", binary_ready_callback);
-            if (window.binary_ready_callback) {
-              window.binary_ready_callback();
+            if (Nimbus.realtime.binary_ready_callback) {
+              Nimbus.realtime.binary_ready_callback();
             }
             if (callback != null) {
               return callback();
@@ -27381,7 +27412,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
 
   Nimbus.Auth.GDrive = {
     init_scope: function() {
-      var isArray, user_email_scope, x;
+      var user_email_scope, x;
       x = this.scope;
       isArray = Array.isArray || function(value) {
         return {}.toString.call(value) === '[object Array]';
@@ -27534,7 +27565,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
           return Nimbus.Auth.authorized_callback();
         }
       };
-      return window.startRealtime(function() {
+      return Nimbus.realtime.startRealtime(function() {
         log("CURRENT SYNCING CALLBACK");
         Nimbus.Auth.app_ready_func();
         Nimbus.track.google.registered_user();
@@ -27733,7 +27764,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
 
   Nimbus.Auth.Multi = {
     authenticate_service: function(service) {
-      var isArray, key, user_email_scope, val, x, _ref;
+      var key, user_email_scope, val, x, _ref;
       log("authenticate a single service", service);
       isArray = Array.isArray || function(value) {
         return {}.toString.call(value) === '[object Array]';
@@ -42963,8 +42994,8 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
       });
       ga('require', 'displayfeatures');
       ga('set', 'dimension1', foundry._current_user.email);
-      ga('set', 'dimension2', c_file.title);
-      ga('set', 'dimension3', c_file.owners[0].emailAddress + ':' + c_file.owners[0].displayName);
+      ga('set', 'dimension2', Nimbus.realtime.c_file.title);
+      ga('set', 'dimension3', Nimbus.realtime.c_file.owners[0].emailAddress + ':' + Nimbus.realtime.c_file.owners[0].displayName);
       count = foundry._models.User.all();
       ga('set', 'dimension4', count);
       return ga('send', 'pageview');
@@ -42972,7 +43003,7 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
     get_owner_space_count = function() {
       var count, space, _i, _len, _ref;
       count = 0;
-      _ref = window.app_files;
+      _ref = Nimbus.realtime.app_files;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         space = _ref[_i];
         if (space.owners[0].permissionId === foundry._current_user.id) {
@@ -43056,8 +43087,8 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
       all_file: function(callback) {
         var self;
         self = this;
-        if (folder) {
-          return Nimbus.Client.GDrive.getMetadataList("'" + folder.binary_files.id + "' in parents", function(data) {
+        if (Nimbus.realtime.folder) {
+          return Nimbus.Client.GDrive.getMetadataList("'" + Nimbus.realtime.folder.binary_files.id + "' in parents", function(data) {
             self._documents = window.create_object_dictionary(data.items);
             if (callback) {
               callback(data.items);
@@ -43190,7 +43221,7 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
         _ref = foundry._user_list;
         for (id in _ref) {
           user = _ref[id];
-          if (user.id === c_file.owners[0].permissionId) {
+          if (user.id === Nimbus.realtime.c_file.owners[0].permissionId) {
             foundry._current_owner = user;
           }
         }
@@ -43229,7 +43260,7 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
             if (user.email) {
               data.email = user.email;
             }
-            if (window.c_file.owners[0].permissionId === pid) {
+            if (Nimbus.realtime.c_file.owners[0].permissionId === pid) {
               data.role = 'Admin';
             } else {
               data.role = 'Viewer';
@@ -43301,8 +43332,8 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
               return angular.element(document).scope().$apply();
             }
           });
-          if (folder && folder['binary_files']) {
-            return Nimbus.Share.add_share_user_real(user.email, null, folder['binary_files'].id);
+          if (Nimbus.realtime.folder && Nimbus.realtime.folder['binary_files']) {
+            return Nimbus.Share.add_share_user_real(user.email, null, Nimbus.realtime.folder['binary_files'].id);
           }
         }
       },
@@ -43547,7 +43578,8 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
   var define_controller;
 
   define('workspace', ['require', 'core/analytic'], function(require, analytic) {
-    var doc_plugin;
+    var c_file, doc_plugin;
+    c_file = Nimbus.realtime.c_file;
     return doc_plugin = {
       type: 'plugin',
       title: 'Workspace',
@@ -43561,12 +43593,12 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
       init: function() {
         var self;
         self = this;
-        if (localStorage['last_opened_workspace'] && (localStorage['last_opened_workspace'] !== c_file.id)) {
+        if (localStorage['last_opened_workspace'] && (localStorage['last_opened_workspace'] !== Nimbus.realtime.c_file.id)) {
           this.open({
             id: localStorage['last_opened_workspace']
           });
         } else {
-          localStorage['last_opened_workspace'] = c_file.id;
+          localStorage['last_opened_workspace'] = Nimbus.realtime.c_file.id;
           foundry.shared_users(function(users) {
             var _users;
             _users = users;
@@ -43597,11 +43629,12 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
       },
       switch_callback: null,
       all_doc: function() {
-        var file, files, folders, _i, _len;
+        var file, files, folders, _i, _len, _ref;
         files = [];
         folders = [];
-        for (_i = 0, _len = app_files.length; _i < _len; _i++) {
-          file = app_files[_i];
+        _ref = Nimbus.realtime.app_files;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          file = _ref[_i];
           if (file.mimeType && file.mimeType === 'application/vnd.google-apps.drive-sdk.' + Nimbus.Auth.app_id) {
             files.push(file);
           } else {
@@ -43619,8 +43652,8 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
             callback();
           }
           angular.element(document).scope().$apply();
-          ga('set', 'dimension2', c_file.title);
-          ga('set', 'dimension3', c_file.owners[0].emailAddress + ':' + c_file.owners[0].displayName);
+          ga('set', 'dimension2', Nimbus.realtime.c_file.title);
+          ga('set', 'dimension3', Nimbus.realtime.c_file.owners[0].emailAddress + ':' + Nimbus.realtime.c_file.owners[0].displayName);
           ga('set', 'dimension4', foundry._models.User.all());
         });
       },
@@ -43631,7 +43664,7 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
         }
         self = this;
         Nimbus.Client.GDrive.insertFile("", name, 'application/vnd.google-apps.drive-sdk', null, function(data) {
-          window.app_files.push(data);
+          Nimbus.realtime.app_files.push(data);
           self._app_files.push(data);
           callback(data);
           angular.element(document).scope().$apply();
@@ -43644,10 +43677,10 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
         });
       },
       current: function() {
-        return window.c_file;
+        return Nimbus.realtime.c_file;
       },
       is_current: function(doc) {
-        return doc.id === window.c_file.id;
+        return doc.id === Nimbus.realtime.c_file.id;
       },
       rename: function(doc, name, cb) {
         var id, old_name, param, request, self;
@@ -43666,14 +43699,14 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
           },
           callback: function(file) {
             var apply_changes, folder, index, query, rename_folder, _file, _ref;
-            _ref = window.app_files;
+            _ref = Nimbus.realtime.app_files;
             for (index in _ref) {
               _file = _ref[index];
               if (doc.id === _file.id) {
                 file.title = name;
               }
             }
-            folder = window.folder.binary_files;
+            folder = Nimbus.realtime.folder.binary_files;
             apply_changes = function(changed_file) {
               if (cb) {
                 cb(changed_file);
@@ -43734,7 +43767,7 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
       },
       del_doc: function(doc, callback) {
         var file, index, _ref, _ref1;
-        if (doc.id === c_file.id) {
+        if (doc.id === Nimbus.realtime.c_file.id) {
           return;
         }
         Nimbus.Client.GDrive.deleteFile(doc.id);
@@ -43745,11 +43778,11 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
             this._app_files.splice(index, 1);
           }
         }
-        _ref1 = window.app_files;
+        _ref1 = Nimbus.realtime.app_files;
         for (index in _ref1) {
           file = _ref1[index];
           if (doc.id === file.id) {
-            window.app_files.splice(index, 1);
+            Nimbus.realtime.app_files.splice(index, 1);
           }
         }
       }
