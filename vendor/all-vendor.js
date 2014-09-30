@@ -22000,7 +22000,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
 
   Nimbus.realtime = {};
 
-  window.handle_initialization = null;
+  Nimbus.realtime.handle_initialization = null;
 
   Nimbus.loaded = false;
 
@@ -25242,9 +25242,9 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
     }
   };
 
-  window.one_time_sync = false;
+  Nimbus.one_time_sync = false;
 
-  window.keys = function(item) {
+  Nimbus.keys = function(item) {
     var key, keys, value;
     keys = [];
     for (key in item) {
@@ -25273,12 +25273,12 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
         return;
       }
       log("#ONE TIME SYNC ALGO RUNNING", this.name);
-      window.one_time_sync = true;
-      window.currently_syncing = true;
+      Nimbus.one_time_sync = true;
+      Nimbus.currently_syncing = true;
       local = this.create_object_dictionary();
       cloud = this.cloudcache;
-      local_set = new Set(keys(local));
-      cloud_set = new Set(keys(cloud));
+      local_set = new Set(Nimbus.keys(local));
+      cloud_set = new Set(Nimbus.keys(cloud));
       log("local_set", local_set);
       log("cloud_set", cloud_set);
       d_array = [];
@@ -25331,8 +25331,8 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
           utl.push(id);
         }
       }
-      window.currently_syncing = false;
-      window.one_time_sync = false;
+      Nimbus.currently_syncing = false;
+      Nimbus.one_time_sync = false;
       log("updated to cloud", utc.length, utc);
       log("updated to local", utl.length, utl);
       return log("equal timestamp", eq.length, eq);
@@ -25342,7 +25342,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
       log("method", method);
       log("record", record);
       this.saveLocal(record, method);
-      if (window.currently_syncing) {
+      if (Nimbus.currently_syncing) {
         return true;
       } else {
         if (method === "update") {
@@ -25451,11 +25451,11 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
       return Nimbus.Client.Dropbox.putFileContents(("/" + Nimbus.Auth.app_name) + ("/" + this.name + "/" + object.id + ".txt"), this.toCloudStructure(object), function(resp) {
         log(object.name, "finished being added to cloud");
         log("resp", resp);
-        window.currently_syncing = true;
+        Nimbus.currently_syncing = true;
         object.time = resp.modified;
         object.synced = true;
         object.save();
-        window.currently_syncing = false;
+        Nimbus.currently_syncing = false;
         if (callback != null) {
           return callback(resp);
         }
@@ -25475,11 +25475,11 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
       log("updated to cloud", object.name);
       return Nimbus.Client.Dropbox.putFileContents(("/" + Nimbus.Auth.app_name) + ("/" + this.name + "/" + object.id + ".txt"), this.toCloudStructure(object), function(resp) {
         log(object.name, "finished being updated to cloud");
-        window.currently_syncing = true;
+        Nimbus.currently_syncing = true;
         object.time = resp.modified;
         object.synced = true;
         object.save();
-        window.currently_syncing = false;
+        Nimbus.currently_syncing = false;
         if (callback != null) {
           return callback(resp);
         }
@@ -25491,13 +25491,13 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
         return function(data) {
           var converted, x;
           log("cloud read data", data);
-          window.currently_syncing = true;
+          Nimbus.currently_syncing = true;
           converted = _this.fromCloudStructure(data);
           x = _this.init(converted);
           x.synced = true;
           x.time = _this.cloudcache[object_id].time;
           x.save();
-          window.currently_syncing = false;
+          Nimbus.currently_syncing = false;
           if (callback != null) {
             return callback(data);
           }
@@ -25510,32 +25510,32 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
         return function(data) {
           var converted, x;
           log("cloud read data", data);
-          window.currently_syncing = true;
+          Nimbus.currently_syncing = true;
           converted = _this.fromCloudStructure(data);
           x = _this.find(object.id);
           converted.time = _this.cloudcache[object.id].time;
           x.updateAttributes(converted);
-          return window.currently_syncing = false;
+          return Nimbus.currently_syncing = false;
         };
       })(this));
     },
     sync_all: function(cb) {
       log("syncs all the data, normally happens at the start of a program or coming back from offline");
-      window.current_syncing = new DelayedOp((function(_this) {
+      Nimbus.current_syncing = new DelayedOp((function(_this) {
         return function() {
           log("call back sync called");
-          window.current_syncing = new DelayedOp(function() {
-            window.current_syncing = null;
+          Nimbus.current_syncing = new DelayedOp(function() {
+            Nimbus.current_syncing = null;
             if (cb != null) {
               return cb();
             }
           });
           _this.sync_model_base_algo();
-          return window.current_syncing.ready();
+          return Nimbus.current_syncing.ready();
         };
       })(this));
       this.load_all_from_cloud();
-      return window.current_syncing.ready();
+      return Nimbus.current_syncing.ready();
     },
     load_all_from_cloud: function() {
       var error;
@@ -25687,12 +25687,12 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
     add_to_cloud: function(object, callback) {
       var content;
       log("add to cloud", object);
-      window.currently_syncing = true;
+      Nimbus.currently_syncing = true;
       object.time = new Date().toString();
       object.type = this.name;
       object.synced = true;
       object.save();
-      window.currently_syncing = false;
+      Nimbus.currently_syncing = false;
       content = this.toCloudStructure(object);
       return Nimbus.realtime.todo.set(object.id, content);
     },
@@ -25712,43 +25712,43 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
       var converted, data, x;
       log("add from cloud GDrive", object_id);
       data = Nimbus.realtime.todo.get(object_id);
-      window.currently_syncing = true;
+      Nimbus.currently_syncing = true;
       converted = this.fromCloudStructure(data);
       x = this.init(converted);
       x.synced = true;
       x.save();
-      return window.currently_syncing = false;
+      return Nimbus.currently_syncing = false;
     },
     update_to_local: function(object, callback) {
       var converted, data, x;
       log("update to local", object);
       data = Nimbus.realtime.todo.get(object.id);
-      window.currently_syncing = true;
+      Nimbus.currently_syncing = true;
       converted = this.fromCloudStructure(data);
       x = this.init(converted);
       x.synced = true;
       x.save();
-      return window.currently_syncing = false;
+      return Nimbus.currently_syncing = false;
     },
     sync_all: function(cb) {
       log("syncs all the data, normally happens at the start of a program or coming back from offline");
       this.load_all_from_cloud();
       this.sync_model_base_algo();
-      window.current_syncing = new DelayedOp((function(_this) {
+      Nimbus.current_syncing = new DelayedOp((function(_this) {
         return function() {
           log("call back sync called");
-          window.current_syncing = new DelayedOp(function() {
-            window.current_syncing = null;
+          Nimbus.current_syncing = new DelayedOp(function() {
+            Nimbus.current_syncing = null;
             if (cb != null) {
               return cb();
             }
           });
           _this.sync_model_base_algo();
-          return window.current_syncing.ready();
+          return Nimbus.current_syncing.ready();
         };
       })(this));
       this.load_all_from_cloud();
-      return window.current_syncing.ready();
+      return Nimbus.current_syncing.ready();
     },
     load_all_from_cloud: function() {
       var content, x, _i, _len, _ref, _results;
@@ -25826,12 +25826,12 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
         current_event = "CREATE";
       } else if (event.newValue === null) {
         log("delete event");
-        window.currently_syncing = true;
+        Nimbus.currently_syncing = true;
         if (model.exists(obj.id)) {
           a = model.find(obj.id);
           a.destroy();
         }
-        window.currently_syncing = false;
+        Nimbus.currently_syncing = false;
         current_event = "DELETE";
       } else {
         log("changing the data inside a entry event");
@@ -26102,8 +26102,8 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
               failure(result);
             }
           }
-          if (window.current_syncing != null) {
-            return window.current_syncing.ok();
+          if (Nimbus.current_syncing != null) {
+            return Nimbus.current_syncing.ok();
           }
         }
       };
@@ -26119,8 +26119,8 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
         log(body);
       }
       log("send request params", method, url, body, success, failure);
-      if (window.current_syncing != null) {
-        window.current_syncing.wait();
+      if (Nimbus.current_syncing != null) {
+        Nimbus.current_syncing.wait();
       }
       xhr.send(body);
       return window.xhr = xhr;
@@ -26424,6 +26424,9 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
             'mimeType': contentType
           }
         };
+        if (properties) {
+          params.body.properties = properties;
+        }
       }
       return this.make_request(params, callback);
     },
@@ -26478,15 +26481,15 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
       xhr.setRequestHeader("Authorization", "Bearer " + accessToken);
       xhr.onload = function() {
         callback(xhr.responseText);
-        if (window.current_syncing != null) {
-          return window.current_syncing.ok();
+        if (Nimbus.current_syncing != null) {
+          return Nimbus.current_syncing.ok();
         }
       };
       xhr.onerror = function() {
         return callback(null);
       };
-      if (window.current_syncing != null) {
-        window.current_syncing.wait();
+      if (Nimbus.current_syncing != null) {
+        Nimbus.current_syncing.wait();
       }
       return xhr.send();
     },
@@ -26547,12 +26550,12 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
         if (callback != null) {
           callback(data);
         }
-        if (window.current_syncing != null) {
-          return window.current_syncing.ok();
+        if (Nimbus.current_syncing != null) {
+          return Nimbus.current_syncing.ok();
         }
       };
-      if (window.current_syncing != null) {
-        window.current_syncing.wait();
+      if (Nimbus.current_syncing != null) {
+        Nimbus.current_syncing.wait();
       }
       return gapi.client.request(params);
     },
@@ -26700,8 +26703,8 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
     },
     get_user_email: function() {
       var access_token, data, xhr;
-      if (window.user_email != null) {
-        return window.user_email;
+      if (Nimbus.realtime.user_email != null) {
+        return Nimbus.realtime.user_email;
       }
       access_token = gapi.auth.getToken().access_token;
       data = null;
@@ -26718,7 +26721,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
       xhr.open("GET", "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=" + access_token, false);
       xhr.send(null);
       if ((data != null ? data.email : void 0) != null) {
-        window.user_email = data.email;
+        Nimbus.realtime.user_email = data.email;
         return data.email;
       }
       return null;
@@ -26820,7 +26823,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
         "title": Nimbus.Auth.app_name,
         "id": id
       };
-      window.current_syncing = new DelayedOp((function(_this) {
+      Nimbus.current_syncing = new DelayedOp((function(_this) {
         return function() {
           if (callback != null) {
             return callback();
@@ -26849,11 +26852,11 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
           return _results;
         }
       });
-      return window.current_syncing.ready();
+      return Nimbus.current_syncing.ready();
     },
     switch_to_app_file_real: function(id, callback) {
       localStorage.last_opened_workspace = id;
-      window.current_syncing = new DelayedOp((function(_this) {
+      Nimbus.current_syncing = new DelayedOp((function(_this) {
         return function() {
           if (callback != null) {
             return callback();
@@ -26896,7 +26899,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
         }
         return gapi.drive.realtime.load(id, Nimbus.realtime.onFileLoaded, Nimbus.realtime.initializeModel, Nimbus.realtime.handleErrors);
       });
-      return window.current_syncing.ready();
+      return Nimbus.current_syncing.ready();
     },
     build_params: function(obj) {
       var k, params_arr, v;
@@ -27141,12 +27144,12 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
       parent = Nimbus.realtime.folder[parent_name].id;
       return Nimbus.Client.GDrive.insertFile(this.toCloudStructure(object), object.id, "text/plain", parent, function(data) {
         log("logging data inserted", data);
-        window.currently_syncing = true;
+        Nimbus.currently_syncing = true;
         object.gid = data.id;
         object.time = data.modifiedDate;
         object.synced = true;
         object.save();
-        return window.currently_syncing = false;
+        return Nimbus.currently_syncing = false;
       });
     },
     delete_from_cloud: function(object_id, callback) {
@@ -27173,11 +27176,11 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
       update_comback = (function(_this) {
         return function(data) {
           log("logging data inserted", data);
-          window.currently_syncing = true;
+          Nimbus.currently_syncing = true;
           object.time = data.modifiedDate;
           object.save();
           object.synced = true;
-          return window.currently_syncing = false;
+          return Nimbus.currently_syncing = false;
         };
       })(this);
       comeback = (function(_this) {
@@ -27186,20 +27189,20 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
           id = data.items[0].id;
           return Nimbus.Client.GDrive.updateFile(_this.toCloudStructure(object), object.id, "text/plain", id, parent, function(data) {
             log("logging data inserted", data);
-            window.currently_syncing = true;
+            Nimbus.currently_syncing = true;
             object.time = data.modifiedDate;
             object.save();
-            return window.currently_syncing = false;
+            return Nimbus.currently_syncing = false;
           });
         };
       })(this);
       if (object.gid != null) {
         return Nimbus.Client.GDrive.updateFile(this.toCloudStructure(object), object.id, "text/plain", object.gid, parent, function(data) {
           log("logging data updated", data);
-          window.currently_syncing = true;
+          Nimbus.currently_syncing = true;
           object.time = data.modifiedDate;
           object.save();
-          return window.currently_syncing = false;
+          return Nimbus.currently_syncing = false;
         });
       } else {
         return Nimbus.Client.GDrive.getMetadataList("title = '" + object.id + "'", comeback);
@@ -27212,13 +27215,13 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
         return function(data) {
           var converted, x;
           log("cloud url data", JSON.parse(data));
-          window.currently_syncing = true;
+          Nimbus.currently_syncing = true;
           converted = _this.fromCloudStructure(data);
           x = _this.init(converted);
           x.synced = true;
           x.time = _this.cloudcache[object_id].time;
           x.save();
-          return window.currently_syncing = false;
+          return Nimbus.currently_syncing = false;
         };
       })(this);
       return Nimbus.Client.GDrive.getMetadataList("title = '" + object_id + "'", function(data) {
@@ -27239,12 +27242,12 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
         return function(data) {
           var converted, x;
           log("cloud url data", JSON.parse(data));
-          window.currently_syncing = true;
+          Nimbus.currently_syncing = true;
           converted = _this.fromCloudStructure(data);
           x = _this.find(object.id);
           converted.time = _this.cloudcache[object.id].time;
           x.updateAttributes(converted);
-          return window.currently_syncing = false;
+          return Nimbus.currently_syncing = false;
         };
       })(this);
       return Nimbus.Client.GDrive.getMetadataList("title = '" + object.id + "'", function(data) {
@@ -27268,21 +27271,21 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
     },
     sync_all: function(cb) {
       log("syncs all the data, normally happens at the start of a program or coming back from offline");
-      window.current_syncing = new DelayedOp((function(_this) {
+      Nimbus.current_syncing = new DelayedOp((function(_this) {
         return function() {
           log("call back sync called");
-          window.current_syncing = new DelayedOp(function() {
-            window.current_syncing = null;
+          Nimbus.current_syncing = new DelayedOp(function() {
+            Nimbus.current_syncing = null;
             if (cb != null) {
               return cb();
             }
           });
           _this.sync_model_base_algo();
-          return window.current_syncing.ready();
+          return Nimbus.current_syncing.ready();
         };
       })(this));
       this.load_all_from_cloud();
-      return window.current_syncing.ready();
+      return Nimbus.current_syncing.ready();
     },
     load_all_from_cloud: function() {
       var fill_cache, folder_id, object_name;
@@ -27347,7 +27350,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
     var c_file, get_app_folder, properties, query, space_folder_name;
     c_file = Nimbus.realtime.c_file;
     space_folder_name = c_file.title + ' files';
-    query = "mimeType = 'application/vnd.google-apps.folder' and title = '" + space_folder_name + "' and properties has { key='space' and value='" + c_file.id + "' and visibility='PRIVATE' }";
+    query = "mimeType = 'application/vnd.google-apps.folder' and properties has { key='space' and value='" + c_file.id + "' and visibility='PRIVATE' }";
     properties = [
       {
         key: 'space',
@@ -27436,7 +27439,6 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
       var data, xhr;
       xhr = new XMLHttpRequest();
       data = "code=" + code + "&client_id=" + this.key + "&client_secret=" + this.client_secret + "&grant_type=authorization_code&redirect_uri=urn%3Aietf%3Awg%3Aoauth%3A2.0%3Aoob";
-      window.data = data;
       xhr.open("POST", "https://accounts.google.com/o/oauth2/token");
       xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
       xhr.onreadystatechange = (function(_this) {
@@ -27463,7 +27465,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
         };
       })(this);
       xhr.send(data);
-      return window.xhr = xhr;
+      return xhr;
     },
     authenticate_gdrive: function() {
       var auth_url, cb, url;
@@ -27594,7 +27596,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
       });
 
       /*
-      window.current_syncing = new DelayedOp =>
+      Nimbus.current_syncing = new DelayedOp =>
         log("CURRENT SYNCING CALLBACK")
         Nimbus.Auth.app_ready_func()
        */
@@ -27900,7 +27902,6 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
       xhr = new XMLHttpRequest();
       log(JSON.stringify(x));
       encoded = Base64.encode(JSON.stringify(x));
-      window.data = "data=" + encoded;
       xhr.open("POST", "http://api.mixpanel.com/engage");
       xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
       xhr.onreadystatechange = (function(_this) {
@@ -27915,7 +27916,7 @@ return t.name="invalid_value",t.status=500,t}function u(e){for(var t=0,n=0,r=e.l
         };
       })(this);
       xhr.send(data);
-      return window.xhr = xhr;
+      return xhr;
     },
     registered_user: function() {
       var email;

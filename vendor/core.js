@@ -677,7 +677,7 @@
       check_users: function() {
         var data, one, pid, user, user_model, _i, _len, _ref, _ref1;
         user_model = foundry._models['User'];
-        console.log('user list total :' + keys(foundry._user_list).length + ', user model total: ' + user_model.all().length);
+        console.log('user list total :' + Object.keys(foundry._user_list).length + ', user model total: ' + user_model.all().length);
         _ref = user_model.all();
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           user = _ref[_i];
