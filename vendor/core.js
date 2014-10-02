@@ -984,7 +984,6 @@
     return angular.module(moduleName).controller('SupportController', [
       '$scope', '$foundry', function($scope, $foundry) {
         var defaultEmail;
-        $scope.newTicket = '';
         defaultEmail = 'admin@nimbusfoundry.com';
         return $scope.createTicket = function() {
           var ccEmails, emails, msg, template;
@@ -1009,8 +1008,17 @@
               return foundry._user_list[user.id] = data;
             }
           });
-          template = "<table style='border-collapse:collapse;width:100%;'> <tr> <td style='background: #1fa086;color: #fff;padding: 10px;border: 1px solid #1fa086;width:20%;border-bottom-color:#ddd;'>Workspace Name</td> <td style='border:1px solid #ddd; padding-left: 20px;'>" + c_file.title + "</td> </tr> <tr> <td style='background: #1fa086;color: #fff;padding: 10px;border: 1px solid #1fa086;width:20%;border-bottom-color:#ddd;'>Workspace Owner</td> <td style='border:1px solid #ddd; padding-left: 20px;'>" + foundry._current_owner.email + "</td> </tr> <tr> <td style='background: #1fa086;color: #fff;padding: 10px;border: 1px solid #1fa086;width:20%;border-bottom-color:#ddd;'>Support Subject</td> <td style='border:1px solid #ddd; padding-left: 20px;'>" + msg + "</td> </tr> </table>";
-          ccEmails = emails.slice(1).join(',');
+          template = "<table style='border-collapse:collapse;width:100%;'> <tr> <td style='background: #1fa086;color: #fff;padding: 10px;border: 1px solid #1fa086;width:20%;border-bottom-color:#ddd;'>Workspace Name</td> <td style='border:1px solid #ddd; padding-left: 20px;'>" + Nimbus.realtime.c_file.title + "</td> </tr> <tr> <td style='background: #1fa086;color: #fff;padding: 10px;border: 1px solid #1fa086;width:20%;border-bottom-color:#ddd;'>Workspace Owner</td> <td style='border:1px solid #ddd; padding-left: 20px;'>" + foundry._current_owner.email + "</td> </tr> <tr> <td style='background: #1fa086;color: #fff;padding: 10px;border: 1px solid #1fa086;width:20%;border-bottom-color:#ddd;'>Support Subject</td> <td style='border:1px solid #ddd; padding-left: 20px;'>" + msg + "</td> </tr> </table>";
+          ccEmails = emails.slice(1).reduce(function(a, b) {
+            var s;
+            s = '';
+            if (a) {
+              s = "" + a + ", '" + (b.split('@')[0]) + "' <" + b + ">";
+            } else {
+              s = "" + (b.split('@')[0]) + "' <" + b + ">";
+            }
+            return s;
+          }, '');
           $foundry.gmail('Forum Support', emails[0], template, ccEmails);
           $('#notification').slideDown().delay(3000).slideUp();
         };
@@ -1571,9 +1579,7 @@
             base64EncodedEmail = base64EncArr(strToUTF8Arr(email)).replace(/\//g, "_").replace(/\+/g, "-");
             request = gapi.client.gmail.users.messages.send({
               'userId': 'me',
-              'message': {
-                'raw': base64EncodedEmail
-              }
+              'raw': base64EncodedEmail
             });
             return request.execute(callback);
           };
