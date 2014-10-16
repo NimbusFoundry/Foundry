@@ -15,7 +15,6 @@ module.exports = function(grunt) {
       dist: {
         src: [
               'vendor/all-vendor.js',
-              'dist/mailComposer.min.js',
               // 'dist/app.js',
               'vendor/core.js'
               ],
