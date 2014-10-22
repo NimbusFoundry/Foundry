@@ -14,7 +14,8 @@
       icon: 'icon-list',
       init: function() {
         console.log('init');
-        return define_controller();
+        define_controller();
+        return foundry.initialized(this.name);
       }
     };
   });

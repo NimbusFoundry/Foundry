@@ -11,6 +11,7 @@ define('demo', ()->
 		init : ()->
 			console.log 'init'
 			define_controller()
+			foundry.initialized(this.name)
 )
 
 define_controller = ()->
