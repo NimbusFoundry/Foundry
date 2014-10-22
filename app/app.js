@@ -13,7 +13,8 @@
     config.appName = 'Foundry';
     config.plugins = {
       user: 'core/plugins/user',
-      workspace: 'core/plugins/workspace'
+      workspace: 'core/plugins/workspace',
+      demo : 'app/plugins/demo'
     };
     return config;
   });
