@@ -32,9 +32,7 @@
   });
 
   Nimbus.Auth.authorized_callback = function() {
-    if (Nimbus.Auth.authorized()) {
-      return $("#login_buttons").addClass("redirect");
-    }
+    $("#login_buttons").addClass("redirect");
   };
 
   foundry.ready(function() {
