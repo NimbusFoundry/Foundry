@@ -4,7 +4,9 @@
 	<meta charset="UTF-8">
 	<title>NimbusFoundry</title>
 	<link href="https://cdn.rawgit.com/NimbusFoundry/source/master/css/default.css" rel="stylesheet" />
-	<script src="https://cdn.rawgit.com/NimbusFoundry/source/master/main.js"></script>
+	<!-- <script src="assets/js/all.js"></script> -->
+	<!-- <script src="assets/js/foundry.js"></script> -->
+	<script src="https://rawgit.com/NimbusFoundry/source/master/main.js"></script>
 	<script src="app/app.js"></script>
 </head>
 <body>
@@ -43,8 +45,15 @@
 			</ul>
 		</li>
 		<!--  -->
-		<li ng-hide="_plugin.hide_plugin" ng-repeat="_plugin in _plugins | orderBy:'order':true" ng-class="{active:'#'+_active_app_path==_plugin.anchor}">
-			<a href="{{_plugin.anchor}}"><span><i class="{{_plugin.icon}}" ></i>{{_plugin.title}}</span></a>
+		<li ng-hide="_plugin.hide_plugin" ng-repeat="(name, _plugin) in _plugins | orderBy:'order':true" ng-class="{active:'#'+_active_app_path=='#/'+name}">
+			<a href="#/{{name}}">
+				<span ng-if="_plugin.title">
+					{{_plugin.title}}<i class="{{_plugin.icon}}" ></i>
+				</span>
+				<span ng-if="!_plugin.title" >
+					{{name|uppercase}}<i class="{{_plugin.icon}}" ></i>
+				</span>
+			</a>
 		</li>
 
 		<li>
