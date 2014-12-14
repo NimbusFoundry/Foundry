@@ -42582,10 +42582,6 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
     return dict;
   };
 
-  if (Nimbus.Client.GDrive.is_auth_redirected()) {
-    $("#login_buttons").addClass("redirect");
-  }
-
   core.current_user = function(callback) {
     var self;
     self = this;
@@ -42626,12 +42622,14 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
     var self;
     self = this;
     return require(['core'], function(main) {
+      var requirePlugins;
       self.plugins_loaded = true;
-      return require(main.plugins, function() {
-        var dependency, plugin, _i, _len;
-        for (_i = 0, _len = arguments.length; _i < _len; _i++) {
-          plugin = arguments[_i];
-          self._plugins[plugin.name] = plugin;
+      requirePlugins = function() {
+        var dependency, key, name, plugin;
+        for (key in arguments) {
+          plugin = arguments[key];
+          name = main.names[key];
+          self._plugins[name] = plugin;
         }
         dependency = self.angular.dependency.concat(['foundry-ui', 'ngRoute']);
         angular.module('foundry', dependency).config([
@@ -42647,12 +42645,18 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
           }
         ]).run([
           '$rootScope', '$location', function($rootScope, $location) {
-            var inex, _plugin, _ref;
-            $rootScope._plugins = [];
+            var index, orderPlugin, pluginToShow, _plugin, _ref;
+            $rootScope._plugins = {};
+            orderPlugin = -15;
+            pluginToShow = '';
             _ref = foundry._plugins;
-            for (inex in _ref) {
-              _plugin = _ref[inex];
-              $rootScope._plugins.push(_plugin);
+            for (index in _ref) {
+              _plugin = _ref[index];
+              if (_plugin.order > orderPlugin) {
+                orderPlugin = plugin.order;
+                pluginToShow = index;
+              }
+              $rootScope._plugins[index] = _plugin;
             }
             $rootScope._active_app_path = '';
             $rootScope._current_global_user = foundry._current_user;
@@ -42662,7 +42666,7 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
               if (default_path && !$location.path()) {
                 $location.path(default_path);
               } else if (!$location.path()) {
-                $location.path('/workspace');
+                $location.path(pluginToShow);
               }
               $rootScope._active_app_path = $location.path();
               localStorage.default_plugin = $location.path();
@@ -42671,26 +42675,32 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
         ]);
         console.log('plugins loaded');
         return self.plugin_load_completed();
-      });
+      };
+      return require(main.names, requirePlugins);
     });
   };
 
   define('core', ['config'], function(config) {
-    var c, key, packages, paths, plugins, value, _ref;
+    var c, key, names, packages, paths, plugins, value, _ref;
     console.log(config);
     paths = {};
-    plugins = [];
+    plugins = {};
+    names = [];
     packages = [];
     _ref = config.plugins;
     for (key in _ref) {
       value = _ref[key];
       paths[key] = value + '/index';
-      plugins.push(key);
+      plugins[key] = value;
+      names.push(key);
       packages.push({
         name: key,
         location: value,
         main: 'index'
       });
+      if (['user', 'workspace', 'document'].indexOf(key) !== -1 && value.indexOf('core/plugins') !== 0) {
+        requirejs.undef(key);
+      }
     }
     requirejs.config({
       'packages': packages
@@ -42699,7 +42709,8 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
       'plugins': plugins,
       'paths': paths,
       'packages': packages,
-      'appName': config.appName
+      'appName': config.appName,
+      'names': names
     };
     return c;
   });
@@ -42752,8 +42763,8 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
     _ref = this._plugins;
     for (k in _ref) {
       v = _ref[k];
-      if (v.type === 'plugin') {
-        this.module_status[v.name] = 'start';
+      if (v.init) {
+        this.module_status[k] = 'start';
       }
     }
     _ref1 = this._plugins;
@@ -42765,6 +42776,7 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
         } catch (_error) {
           e = _error;
           console.log(e);
+          this.initialized(k);
         }
       }
     }
@@ -42777,7 +42789,7 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
     _ref = this._plugins;
     for (k in _ref) {
       v = _ref[k];
-      if (this.module_status[v.name] === 'start') {
+      if (this.module_status[k] === 'start') {
         return;
       }
     }
@@ -42838,7 +42850,7 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
 
 
   /*
-    parse context within url
+  	parse context within url
    */
 
   core.parse_open_url = function() {
@@ -42873,7 +42885,7 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
 
 
   /*
-    function: initialize the setting
+  	function: initialize the setting
    */
 
   core.init_settings = function() {
@@ -42885,8 +42897,8 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
 
 
   /*
-    input: the key and the value to set
-    function: set the setting
+  	input: the key and the value to set
+  	function: set the setting
    */
 
   core.set_setting = function(key, value) {
@@ -42909,9 +42921,9 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
 
 
   /*
-    input: the key for the setting to retrieve
-    output: the value of the key
-    function: output a setting
+  	input: the key for the setting to retrieve
+  	output: the value of the key
+  	function: output a setting
    */
 
   core.get_setting = function(key) {
@@ -42965,15 +42977,15 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
 }).call(this);
 
 (function(i, s, o, g, r, a, m) {
-  i['GoogleAnalyticsObject'] = r;
-  i[r] = i[r] ||
-  function() {
-    (i[r].q = i[r].q || []).push(arguments)
-  }, i[r].l = 1 * new Date();
-  a = s.createElement(o), m = s.getElementsByTagName(o)[0];
-  a.async = 1;
-  a.src = g;
-  m.parentNode.insertBefore(a, m)
+	i['GoogleAnalyticsObject'] = r;
+	i[r] = i[r] ||
+	function() {
+		(i[r].q = i[r].q || []).push(arguments)
+	}, i[r].l = 1 * new Date();
+	a = s.createElement(o), m = s.getElementsByTagName(o)[0];
+	a.async = 1;
+	a.src = g;
+	m.parentNode.insertBefore(a, m)
 })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
 
 // Generated by CoffeeScript 1.8.0
@@ -43194,9 +43206,7 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
   define('user', ['require', 'core/analytic'], function(require, analytic) {
     var user_plugin;
     return user_plugin = {
-      name: 'user',
       _models: {},
-      anchor: '#/user',
       title: 'Users',
       type: 'plugin',
       order: -12,
@@ -43209,7 +43219,7 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
         this._models['user'] = {};
         foundry.model(name, attributes, function(model) {
           self._models['user'] = model;
-          foundry.initialized(self.name);
+          foundry.initialized('user');
         });
       },
       inited: function() {
@@ -43266,7 +43276,7 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
               data.role = 'Viewer';
             }
             if (pid === foundry._current_user.id) {
-              data.email = window.user_email;
+              data.email = foundry._current_user.email;
             }
             user_model.create(data);
             user.roleName = data.role;
@@ -43391,7 +43401,7 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
         $scope.users = foundry._user_list;
 
         /*
-              basic settings
+        			basic settings
          */
         $rootScope.breadcum = 'Users';
         $rootScope.shortcut_name = 'Add User';
@@ -43448,7 +43458,7 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
         };
 
         /*
-              user CURD
+        			user CURD
          */
         $scope.edit_user = function(id) {
           $scope.form_mode = 'edit';
@@ -43506,7 +43516,7 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
     return angular.module('foundry').run([
       '$templateCache', function($templateCache) {
         var html;
-        html = '<div ng-controller="UserListController"> <div class="breadcrumb"> <h1 ng-bind="breadcum"></h1> <div class="pull-right"> <a class="btn outline" ng-click="add_shortcut()">Add User</a> </div> </div> <div class="container-fluid"> <div class="row-fluid"> <div class="well-content"> <div> <table class="table"> <thead> <tr> <th>Current Users</th> </tr> </thead> <tbody> <tr ng-repeat="user in users"> <td> <div class="user_listing"> <img class="pic" ng-src="{{user.pic || ' + "'photo.jpg'" + '}}" /> <span class="name">{{user.name}}</span><span class="pill">{{user.roleName || ' + "'Viewer'" + '}}</span> <span class="badge badge-info" ng-if="is_owner(user)" style="border-radius: 5px;padding: 3px 5px;position: relative;top: -2px;text-transform: uppercase;">Owner</span> <div class="pull-right list_menu"> <a class="btn outline narrow" ng-click="edit_user(user.id)" ng-show="user_permission==' + "'Admin'" + '">edit</a> <a class="btn outline narrow" ng-click="show_user(user.id)">show</a> <a class="btn outline narrow" confirm on-confirm="del_user(user.id)" ng-show="user_permission==' + "'Admin'" + '"><i class="icon-trash" ></i></a> </div> </div> </td> </tr> </tbody> </table> </div> <div class="form modal fade nimbus_form_modal"> <div class="modal-dialog"> <div class="modal-content"> <div class="modal-header"> <button type="button" class="close" aria-hidden="true" ng-click="clear()">&times;</button> <h4 class="modal-title">User Form</h4> </div> <div class="modal-body"> <model-form model-name="usermodel" form-mode="form_mode" instance-name="user_data" on-create="submit()" on-update="update()"></model-form> </div> </div><!-- /.modal-content --> </div><!-- /.modal-dialog --> </div> <div class="update_form modal fade nimbus_form_modal"> <div class="modal-dialog"> <div class="modal-content"> <div class="modal-header"> <button type="button" class="close" aria-hidden="true" ng-click="clear()">&times;</button> <h4 class="modal-title">User Form</h4> </div> <div class="modal-body"> <model-form model-name="userEditModel" form-mode="form_mode" instance-name="user_data" on-create="submit()" on-update="update()"></model-form> </div> </div><!-- /.modal-content --> </div><!-- /.modal-dialog --> </div> <div class="modal fade userinfo"> <div class="modal-dialog"> <div class="modal-content"> <div class="modal-header"> <button type="button" class="close" aria-hidden="true" ng-click="clear()">&times;</button> <h4 class="modal-title" >User Info</h4> </div> <div class="modal-body"> <dl class="dl-horizontal" id="user_form"> <dt>Name :<dt> <dd>{{user_info.name}}</dd> <dt>Email : </dt><dd>{{user_info.email}}</dd> </dl> </div> </div><!-- /.modal-content --> </div><!-- /.modal-dialog --> </div> </div> </div> </div> </div>';
+        html = '<div ng-controller="UserListController"> <div class="breadcrumb"> <h1 ng-bind="breadcum"></h1> <div class="pull-right"> <a class="btn outline" ng-click="add_shortcut()">Add User</a> </div> </div> <div class="container-fluid"> <div class="row-fluid"> <div class="well-content"> <div> <table class="table"> <thead> <tr> <th>Current Users</th> </tr> </thead> <tbody> <tr ng-repeat="user in users"> <td> <div class="user_listing"> <img class="pic" ng-src="{{user.pic || ' + "'assets/img/photo.jpg'" + '}}" /> <span class="name">{{user.name}}</span><span class="pill">{{user.roleName || ' + "'Viewer'" + '}}</span> <span class="badge badge-info" ng-if="is_owner(user)" style="border-radius: 5px;padding: 3px 5px;position: relative;top: -2px;text-transform: uppercase;">Owner</span> <div class="pull-right list_menu"> <a class="btn outline narrow" ng-click="edit_user(user.id)" ng-show="user_permission==' + "'Admin'" + '">edit</a> <a class="btn outline narrow" ng-click="show_user(user.id)">show</a> <a class="btn outline narrow" confirm on-confirm="del_user(user.id)" ng-show="user_permission==' + "'Admin'" + '"><i class="icon-trash" ></i></a> </div> </div> </td> </tr> </tbody> </table> </div> <div class="form modal fade nimbus_form_modal"> <div class="modal-dialog"> <div class="modal-content"> <div class="modal-header"> <button type="button" class="close" aria-hidden="true" ng-click="clear()">&times;</button> <h4 class="modal-title">User Form</h4> </div> <div class="modal-body"> <model-form model-name="usermodel" form-mode="form_mode" instance-name="user_data" on-create="submit()" on-update="update()"></model-form> </div> </div><!-- /.modal-content --> </div><!-- /.modal-dialog --> </div> <div class="update_form modal fade nimbus_form_modal"> <div class="modal-dialog"> <div class="modal-content"> <div class="modal-header"> <button type="button" class="close" aria-hidden="true" ng-click="clear()">&times;</button> <h4 class="modal-title">User Form</h4> </div> <div class="modal-body"> <model-form model-name="userEditModel" form-mode="form_mode" instance-name="user_data" on-create="submit()" on-update="update()"></model-form> </div> </div><!-- /.modal-content --> </div><!-- /.modal-dialog --> </div> <div class="modal fade userinfo"> <div class="modal-dialog"> <div class="modal-content"> <div class="modal-header"> <button type="button" class="close" aria-hidden="true" ng-click="clear()">&times;</button> <h4 class="modal-title" >User Info</h4> </div> <div class="modal-body"> <dl class="dl-horizontal" id="user_form"> <dt>Name :<dt> <dd>{{user_info.name}}</dd> <dt>Email : </dt><dd>{{user_info.email}}</dd> </dl> </div> </div><!-- /.modal-content --> </div><!-- /.modal-dialog --> </div> </div> </div> </div> </div>';
         return $templateCache.put('core/plugins/user/index.html', html);
       }
     ]);
@@ -43520,14 +43530,12 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
 
   define('support', function() {
     return {
-      name: 'support',
       title: 'Support',
-      anchor: '#/support',
       type: 'plugin',
       icon: 'icon-info-sign',
       order: -15,
       init: function() {
-        return foundry.initialized(this.name);
+        return foundry.initialized('support');
       },
       inited: function() {
         return define_controller();
@@ -43579,7 +43587,7 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
             }
             return s;
           }, '');
-          $foundry.gmail('Forum Support', emails[0], template, ccEmails);
+          $foundry.email('Forum Support', emails[0], template, ccEmails);
           $('#notification').slideDown().delay(3000).slideUp();
         };
       }
@@ -43651,21 +43659,7 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
       },
       switch_callback: null,
       all_doc: function() {
-        var file, files, folders, _i, _len, _ref;
-        files = [];
-        folders = [];
-        _ref = Nimbus.realtime.app_files;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          file = _ref[_i];
-          if (file.mimeType && file.mimeType === 'application/vnd.google-apps.drive-sdk.' + Nimbus.Auth.app_id) {
-            files.push(file);
-          } else {
-            folders.push(file);
-          }
-        }
-        this._app_files = files;
-        this._app_folders = folders;
-        return this._app_files;
+        return Nimbus.realtime.app_files;
       },
       open: function(doc, callback) {
         localStorage['last_opened_workspace'] = doc.id;
@@ -44623,11 +44617,26 @@ for(var p=1;g>p;p++){i=b("sha1",e),i.update(k),k=i.digest();for(var q=0;j>q;q++)
 }).call(this);
 
 // Generated by CoffeeScript 1.8.0
-angular.module('foundry-ui').filter('utc_date', function() {
-  return function(input, format) {
-    var out;
-    out = new Date(input);
-    out = out.toDateString();
-    return out;
-  };
-});
+(function() {
+  angular.module('foundry-ui').filter('utc_date', function() {
+    return function(input, format) {
+      var out;
+      out = new Date(input);
+      out = out.toDateString();
+      return out;
+    };
+  }).filter('toArray', function() {
+    return function(obj) {
+      if (!(obj instanceof Object)) {
+        return obj;
+      }
+      return Object.keys(obj).map(function(key) {
+        return Object.defineProperty(obj[key], '$key', {
+          __proto__: null,
+          value: key
+        });
+      });
+    };
+  });
+
+}).call(this);
